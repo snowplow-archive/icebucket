@@ -30,27 +30,16 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.document.{AttributeUpdate, DynamoDB, Item}
 
-/**
- * EventService manages state of events in a mutable array
- * as test data.  WIP: Connection to DynamoDB.
- */
-object EventService {
-
-
-
-
-
-
 
 /**
  * Object sets up singleton that finds AWS credentials for DynamoDB to access the
- * aggregation records table. The utility function below puts items into the
- * "AggregateRecords" table.
+ * aggregation records table.
  */
-object DynamoUtils {
+object EventService {
 
   val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   val timezone = TimeZone.getTimeZone("UTC")
+
 
   /**
    * Function timezone helper
@@ -74,28 +63,28 @@ object DynamoUtils {
   /**
    * Function wraps get or create item in DynamoDB table
    */
-  def setOrUpdateCount(dynamoDB: DynamoDB, tableName: String, bucketStart: String, eventType: String, createdAt: String,  updatedAt: String, count: Int){
+  def setOrUpdateCount(dynamoDB: DynamoDB, tableName: String, timestamp: String, eventType: String, createdAt: String,  updatedAt: String, count: Int){
 
-    val recordInTable = getItem(dynamoDB: DynamoDB, tableName, bucketStart, eventType)
+    val recordInTable = getItem(dynamoDB: DynamoDB, tableName, timestamp, eventType)
     println(recordInTable)
     if (recordInTable == null) {
-      DynamoUtils.putItem(dynamoDB: DynamoDB, tableName, bucketStart, eventType, createdAt, updatedAt, count)
+      putItem(dynamoDB: DynamoDB, tableName, timestamp, eventType, createdAt, updatedAt, count)
     } else {
       val oldCreatedAt = recordInTable.getJSON("CreatedAt").replace("\"", "").replace("\\", "")
       val oldCount = recordInTable.getJSON("Count").toInt
       val newCount = oldCount + count.toInt
-      DynamoUtils.putItem(dynamoDB: DynamoDB, tableName, bucketStart, eventType, oldCreatedAt, updatedAt, newCount)
+      putItem(dynamoDB: DynamoDB, tableName, timestamp, eventType, oldCreatedAt, updatedAt, newCount)
     }
   }
-
+  
 
   /**
    * Function wraps AWS Java getItemOutcome operation to DynamoDB table
    */
-  def getItem(dynamoDB: DynamoDB, tableName: String, bucketStart: String, eventType: String): Item = {
+  def getItem(dynamoDB: DynamoDB, tableName: String, timestamp: String, eventType: String): Item = {
 
     val table = dynamoDB.getTable(tableName)
-    val items = table.getItemOutcome("BucketStart", bucketStart, "EventType", eventType)
+    val items = table.getItemOutcome("Timestamp", timestamp, "EventType", eventType)
     items.getItem
   }
 
@@ -103,10 +92,10 @@ object DynamoUtils {
   /**
    * Function wraps AWS Java putItem operation to DynamoDB table
    */
-  def putItem(dynamoDB: DynamoDB, tableName: String, bucketStart: String, eventType: String, createdAt: String,  updatedAt: String, count: Int) {
+  def putItem(dynamoDB: DynamoDB, tableName: String, timestamp: String, eventType: String, createdAt: String,  updatedAt: String, count: Int) {
 
     // AggregateRecords column names
-    val tablePrimaryKeyName = "BucketStart"
+    val tablePrimaryKeyName = "Timestamp"
     val tableEventTypeSecondaryKeyName = "EventType"
     val tableCreatedAtColumnName = "CreatedAt"
     val tableUpdatedAtColumnName = "UpdatedAt"
@@ -120,7 +109,7 @@ object DynamoUtils {
       val table = dynamoDB.getTable(tableName)
       println("Adding data to " + tableName)
 
-      val item = new Item().withPrimaryKey(tablePrimaryKeyName, bucketStart)
+      val item = new Item().withPrimaryKey(tablePrimaryKeyName, timestamp)
         .withString(tableEventTypeSecondaryKeyName, eventType)
         .withString(tableCreatedAtColumnName, createdAt)
         .withString(tableUpdatedAtColumnName, updatedAt)
@@ -136,16 +125,6 @@ object DynamoUtils {
       }
     }
   }
-}
-
-
-
-
-
-
-
-
-
 
 
   //////////////////////////////////////////////////////////////
