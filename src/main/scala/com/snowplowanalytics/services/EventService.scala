@@ -18,10 +18,13 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
-import scala.collection.JavaConverters._
-
+import com.amazonaws.services.dynamodbv2.model.{ProjectionType, KeyType}
+import com.sun.xml.internal.bind.v2.schemagen.xmlschema.AttributeType
 
 // Scala
+import com.amazonaws.services.dynamodbv2._
+import awscala._
+import dynamodb2._
 import spray.json._
 import spray.json.JsonParser
 import DefaultJsonProtocol._
@@ -36,8 +39,12 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 
 // AWS DynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.dynamodbv2.document.{AttributeUpdate, DynamoDB, Item}
+import com.amazonaws.services.dynamodbv2.document.{Table, AttributeUpdate, DynamoDB, Item}
 
+
+
+
+// Scala
 
 /**
  * Object sets up singleton that finds AWS credentials for DynamoDB to access the
@@ -154,7 +161,7 @@ object EventService {
   }
 
 
-  def getEvents: List[SimpleEvent] = {
+  def getEvents4: List[SimpleEvent] = {
     val credentials = new ProfileCredentialsProvider("default")
     val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
     val table = dynamoDB.getTable("my-table")
@@ -164,6 +171,36 @@ object EventService {
     //val result = data.convertTo[SimpleEvent]
     List(SimpleEvent(Some(123), records.get("Timestamp").toString, records.get("EventType").toString, records.get("Count").toString.toInt))
   }
+
+
+
+
+
+
+
+  def getEvents: List[SimpleEvent] = {
+    //val credentials = new ProfileCredentialsProvider("default")
+    //val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
+    implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
+    val table: Table = dynamoDB.table("my-table").get
+    List(SimpleEvent(Some(123), "asdfas", "asdf", 123))
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   def addEvent(event: SimpleEvent): SimpleEvent = {
     val maxId = testEvents.map(_.id).flatten.max + 1

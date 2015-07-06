@@ -24,12 +24,15 @@ resolvers ++= Seq(
   "spray repo" at "http://repo.spray.io/"
 )
 
+
 libraryDependencies ++= {
-  val awsSdk = "1.9.34"
-  val akkaV  = "2.3.3"
-  val sprayV = "1.3.0"
+  val awsSdk  = "1.9.34"
+  val akkaV   = "2.3.3"
+  val sprayV  = "1.3.0"
+  val awScala = "0.5.+"
   Seq(
     "com.amazonaws"       %   "aws-java-sdk"      % awsSdk,
+    "com.github.seratch"  %%   "awscala"          % awScala,
     "io.spray"            %   "spray-servlet"     % sprayV,
     "io.spray"            %   "spray-routing"     % sprayV,
     "io.spray"            %   "spray-testkit"     % sprayV,
