@@ -16,7 +16,7 @@ organization  := "com.snowplowanalytics"
 
 version       := "1.0"
 
-scalaVersion  := "2.10.5"
+scalaVersion  := "2.11.6"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-feature")
 
@@ -26,26 +26,22 @@ resolvers ++= Seq(
 
 
 libraryDependencies ++= {
-  val awsSdk  = "1.9.34"
-  val akkaV   = "2.3.3"
-  val sprayV  = "1.3.0"
-  val awScala = "0.5.+"
+  val akkaV   = "2.3.4"
+  val sprayV  = "1.3.1"
   Seq(
-    "com.amazonaws"       %   "aws-java-sdk"      % awsSdk,
-    "com.github.seratch"  %%   "awscala"          % awScala,
+    "com.amazonaws"       %   "aws-java-sdk"      % "1.10.1",
+    "org.scala-lang"      %   "scala-xml"         % "2.11.0-M4",
+    "com.github.seratch"  %%  "awscala"           % "0.5.+",
     "io.spray"            %   "spray-servlet"     % sprayV,
     "io.spray"            %   "spray-routing"     % sprayV,
-    "io.spray"            %   "spray-testkit"     % sprayV,
     "io.spray"            %   "spray-client"      % sprayV,
     "io.spray"            %   "spray-util"        % sprayV,
     "io.spray"            %   "spray-caching"     % sprayV,
     "io.spray"            %   "spray-can"         % sprayV,
     "io.spray"            %%  "spray-json"        % "1.3.2",
-    "com.typesafe.akka"   %%  "akka-slf4j"        % "2.3.11",
-    "ch.qos.logback"      %   "logback-classic"   % "1.0.13",
-    "com.typesafe.akka"   %%  "akka-actor"        % akkaV,
-    "com.typesafe.akka"   %%  "akka-testkit"      % akkaV,
-    "org.specs2"          %%  "specs2"            % "2.2.3"    % "test"
+    "com.typesafe.akka"   %%  "akka-slf4j"        % "2.3.4",
+    "ch.qos.logback"      %   "logback-classic"   % "1.1.3",
+    "com.typesafe.akka"   %%  "akka-actor"        % akkaV
   )
 }
 

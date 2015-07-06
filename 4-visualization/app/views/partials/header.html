@@ -1,0 +1,5 @@
+<h3 class="masthead-brand">Icebucket{{$path()}}</h3>
+<ul class="nav masthead-nav" bs-nav>
+  <li ng-class="{active: $path() == '/'}"><a href="#/">Home</a></li>
+  <li ng-class="{active: $path().match('^/events')}"><a href="#/events">Events</a></li>
+</ul>
