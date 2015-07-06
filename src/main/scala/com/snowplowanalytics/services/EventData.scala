@@ -36,5 +36,6 @@ object EventData {
     SimpleEvent(Some(9), "2015-06-30T10:00:00.000", "Green", 25),
     SimpleEvent(Some(10), "2015-06-30T10:00:00.000", "Yellow", 210),
     SimpleEvent(Some(11), "2015-06-30T10:00:00.000", "Blue", 230),
-    SimpleEvent(Some(12), "2015-06-30T10:00:00.000", "Red", 290))
+    SimpleEvent(Some(12), "2015-06-30T10:00:00.000", "Red", 290)
+  )
 }

@@ -18,6 +18,14 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
+import scala.collection.JavaConverters._
+
+
+// Scala
+import spray.json._
+import spray.json.JsonParser
+import DefaultJsonProtocol._
+
 // package import
 import com.snowplowanalytics.model.SimpleEvent
 
@@ -147,7 +155,14 @@ object EventService {
 
 
   def getEvents: List[SimpleEvent] = {
-    testEvents.toList.filter(x => x.eventType == "Red")
+    val credentials = new ProfileCredentialsProvider("default")
+    val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
+    val table = dynamoDB.getTable("my-table")
+    val items = table.getItemOutcome("Timestamp", "2015-06-30T12:00:00.000", "EventType", "Blue")
+    val records = items.getItem.asMap()
+    // { Item: {Count=63, EventType=Blue, Timestamp=2015-06-30T12:00:00.000, CreatedAt=2015-06-30T12:00:00.000} }
+    //val result = data.convertTo[SimpleEvent]
+    List(SimpleEvent(Some(123), records.get("Timestamp").toString, records.get("EventType").toString, records.get("Count").toString.toInt))
   }
 
   def addEvent(event: SimpleEvent): SimpleEvent = {
