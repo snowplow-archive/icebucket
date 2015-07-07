@@ -18,13 +18,13 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
-import com.amazonaws.services.dynamodbv2.model.{ProjectionType, KeyType}
+import com.amazonaws.services.dynamodbv2.model.{ScanRequest, ProjectionType, KeyType}
 import com.sun.xml.internal.bind.v2.schemagen.xmlschema.AttributeType
 
 // Scala
 import com.amazonaws.services.dynamodbv2._
 import awscala._
-import dynamodb2._
+import  dynamodb2._
 import spray.json._
 import spray.json.JsonParser
 import DefaultJsonProtocol._
@@ -179,10 +179,13 @@ object EventService {
 
 
   def getEvents: List[SimpleEvent] = {
-    //val credentials = new ProfileCredentialsProvider("default")
-    //val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
-    implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
-    val table: Table = dynamoDB.table("my-table").get
+    val credentials = new ProfileCredentialsProvider("default")
+    val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
+    val table = "my-table"
+    val scanRequest = new ScanRequest().withTableName(table)
+    //val result = scanRequest.addScanFilterEntry(key="Timestamp", value="2015-06-30T12:00:00.000")
+    //scanRequest.
+
     List(SimpleEvent(Some(123), "asdfas", "asdf", 123))
   }
 

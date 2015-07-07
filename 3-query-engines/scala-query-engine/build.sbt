@@ -16,7 +16,7 @@ organization  := "com.snowplowanalytics"
 
 version       := "1.0"
 
-scalaVersion  := "2.11.6"
+scalaVersion  := "2.10.5"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8", "-feature")
 
@@ -24,13 +24,11 @@ resolvers ++= Seq(
   "spray repo" at "http://repo.spray.io/"
 )
 
-
 libraryDependencies ++= {
   val akkaV   = "2.3.4"
   val sprayV  = "1.3.1"
   Seq(
-    "com.amazonaws"       %   "aws-java-sdk"      % "1.10.1",
-    "org.scala-lang"      %   "scala-xml"         % "2.11.0-M4",
+    "com.amazonaws"       %   "aws-java-sdk"      % "1.10.2",
     "com.github.seratch"  %%  "awscala"           % "0.5.+",
     "io.spray"            %   "spray-servlet"     % sprayV,
     "io.spray"            %   "spray-routing"     % sprayV,
