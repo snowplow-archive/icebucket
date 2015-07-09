@@ -18,16 +18,15 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
-import com.amazonaws.services.dynamodbv2.model.{ScanRequest, ProjectionType, KeyType}
-import com.sun.xml.internal.bind.v2.schemagen.xmlschema.AttributeType
+//import com.amazonaws.services.dynamodbv2.model.{ScanRequest, ProjectionType, KeyType}
+//import com.sun.xml.internal.bind.v2.schemagen.xmlschema.AttributeType
 
 // Scala
-import com.amazonaws.services.dynamodbv2._
+//import com.amazonaws.services.dynamodbv2._
 import awscala._
-import  dynamodb2._
+import awscala.dynamodbv2._
 import spray.json._
-import spray.json.JsonParser
-import DefaultJsonProtocol._
+import com.amazonaws.services.{ dynamodbv2 => aws }
 
 // package import
 import com.snowplowanalytics.model.SimpleEvent
@@ -39,9 +38,14 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 
 // AWS DynamoDB
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-import com.amazonaws.services.dynamodbv2.document.{Table, AttributeUpdate, DynamoDB, Item}
+//import com.amazonaws.services.dynamodbv2.document.{Table, AttributeUpdate, DynamoDB, Item}
 
 
+import awscala._
+import awscala.dynamodbv2._
+import awscala.dynamodbv2.GlobalSecondaryIndex
+import com.amazonaws.services.{ dynamodbv2 => aws }
+import spray.json._
 
 
 // Scala
@@ -55,6 +59,24 @@ object EventService {
   val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   val timezone = TimeZone.getTimeZone("UTC")
 
+  implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
+
+  val Hash = aws.model.KeyType.HASH
+  val Range = aws.model.KeyType.RANGE
+  val Include = aws.model.ProjectionType.INCLUDE
+  val All = aws.model.ProjectionType.ALL
+  val tablename = "my-table"
+  val eventType = "Red"
+  val timestamp = "2015-06-05T12:56:00.000"
+  val table: Table = dynamoDB.table(tablename).get
+
+  val globalSecondaryIndex = GlobalSecondaryIndex(
+    name = "CountsIndex",
+    keySchema = Seq(KeySchema("EventType", Hash), KeySchema("Timestamp", Range)),
+    projection = Projection(All),
+    provisionedThroughput = ProvisionedThroughput(readCapacityUnits = 10, writeCapacityUnits = 10)
+  )
+
 
   /**
    * Function timezone helper
@@ -62,83 +84,6 @@ object EventService {
   def timeNow(): String = {
     dateFormatter.setTimeZone(timezone)
     dateFormatter.format(new Date())
-  }
-
-
-  /**
-   * Function wraps DynamoDB cred setup
-   */
-  def setupDynamoClientConnection(awsProfile: String): DynamoDB = {
-    val credentials = new ProfileCredentialsProvider(awsProfile)
-    val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
-    dynamoDB
-  }
-
-
-  /**
-   * Function wraps get or create item in DynamoDB table
-   */
-  def setOrUpdateCount(dynamoDB: DynamoDB, tableName: String, timestamp: String, eventType: String, createdAt: String,  updatedAt: String, count: Int){
-
-    val recordInTable = getItem(dynamoDB: DynamoDB, tableName, timestamp, eventType)
-    println(recordInTable)
-    if (recordInTable == null) {
-      putItem(dynamoDB: DynamoDB, tableName, timestamp, eventType, createdAt, updatedAt, count)
-    } else {
-      val oldCreatedAt = recordInTable.getJSON("CreatedAt").replace("\"", "").replace("\\", "")
-      val oldCount = recordInTable.getJSON("Count").toInt
-      val newCount = oldCount + count.toInt
-      putItem(dynamoDB: DynamoDB, tableName, timestamp, eventType, oldCreatedAt, updatedAt, newCount)
-    }
-  }
-  
-
-  /**
-   * Function wraps AWS Java getItemOutcome operation to DynamoDB table
-   */
-  def getItem(dynamoDB: DynamoDB, tableName: String, timestamp: String, eventType: String): Item = {
-
-    val table = dynamoDB.getTable(tableName)
-    val items = table.getItemOutcome("Timestamp", timestamp, "EventType", eventType)
-    items.getItem
-  }
-
-
-  /**
-   * Function wraps AWS Java putItem operation to DynamoDB table
-   */
-  def putItem(dynamoDB: DynamoDB, tableName: String, timestamp: String, eventType: String, createdAt: String,  updatedAt: String, count: Int) {
-
-    // AggregateRecords column names
-    val tablePrimaryKeyName = "Timestamp"
-    val tableEventTypeSecondaryKeyName = "EventType"
-    val tableCreatedAtColumnName = "CreatedAt"
-    val tableUpdatedAtColumnName = "UpdatedAt"
-    val tableCountColumnName = "Count"
-
-    try {
-      val time = new Date().getTime - (1 * 24 * 60 * 60 * 1000)
-      val date = new Date()
-      date.setTime(time)
-      dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"))
-      val table = dynamoDB.getTable(tableName)
-      println("Adding data to " + tableName)
-
-      val item = new Item().withPrimaryKey(tablePrimaryKeyName, timestamp)
-        .withString(tableEventTypeSecondaryKeyName, eventType)
-        .withString(tableCreatedAtColumnName, createdAt)
-        .withString(tableUpdatedAtColumnName, updatedAt)
-        .withInt(tableCountColumnName, count)
-
-      // saving the data to DynamoDB AggregrateRecords table
-      // println(item)
-      table.putItem(item)
-    } catch {
-      case e: Exception => {
-        System.err.println("Failed to create item in " + tableName)
-        System.err.println(e.getMessage)
-      }
-    }
   }
 
 
@@ -161,46 +106,57 @@ object EventService {
   }
 
 
-  def getEvents4: List[SimpleEvent] = {
-    val credentials = new ProfileCredentialsProvider("default")
-    val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
-    val table = dynamoDB.getTable("my-table")
-    val items = table.getItemOutcome("Timestamp", "2015-06-30T12:00:00.000", "EventType", "Blue")
-    val records = items.getItem.asMap()
-    // { Item: {Count=63, EventType=Blue, Timestamp=2015-06-30T12:00:00.000, CreatedAt=2015-06-30T12:00:00.000} }
-    //val result = data.convertTo[SimpleEvent]
-    List(SimpleEvent(Some(123), records.get("Timestamp").toString, records.get("EventType").toString, records.get("Count").toString.toInt))
+
+
+
+  // provide "Red", "2015-06-20T12:32:00.00" and get count back
+  def getEvents5(): List[SimpleEvent] = {
+
+      println(getCount(eventType, timestamp, table))
+      List(SimpleEvent(Some(123), eventType, timestamp, getCount(eventType, timestamp, table)(0).toInt))
   }
 
+  def getEvents(): List[SimpleEvent] = {
 
-
-
-
-
-
-  def getEvents: List[SimpleEvent] = {
-    val credentials = new ProfileCredentialsProvider("default")
-    val dynamoDB = new DynamoDB(new AmazonDynamoDBClient(credentials))
-    val table = "my-table"
-    val scanRequest = new ScanRequest().withTableName(table)
-    //val result = scanRequest.addScanFilterEntry(key="Timestamp", value="2015-06-30T12:00:00.000")
-    //scanRequest.
-
-    List(SimpleEvent(Some(123), "asdfas", "asdf", 123))
+    println(getCount(eventType, timestamp, table))
+    List(SimpleEvent(Some(123), eventType, timestamp, getCount(eventType, timestamp, table)(0).toInt))
   }
 
+  def getCount(eventType: String, timestamp: String, table: Table): Seq[String] = {
+    val findRedwithTimestamp: Seq[Item] = table.queryWithIndex(
+      index = globalSecondaryIndex,
+      keyConditions = Seq("EventType" -> cond.eq(eventType), "Timestamp" -> cond.eq(timestamp))
+    )
+    findRedwithTimestamp.flatMap(_.attributes.find(_.name == "Count").map(_.value.n.get))
+  }
 
+  // val bucket = "2015-06-05T12:56:00.000"
+  // getListOfEventsByTimestamp(bucket, table)
+  // res2: Seq[String] = ArrayBuffer(Green, Blue, Red, Yellow)
+  def getListOfEventsByTimestamp(bucket: String, table: Table): Seq[String] = {
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
+    val attribsOfFourElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    timestampResult.flatMap(_.attributes.find(_.name == "EventType").map(_.value.s.get))
+  }
 
+  // convertDataStage1(attribsOfFourElements)
+  def convertDataStage1(myArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): Unit = {
+    myArray.map(_.map(unpack))
+  }
 
+  // attribsOfFourElements.map(_.foreach(unpack))
+  def unpack(attribs: Any): SimpleEvent = {
 
-
-
-
-
-
-
-
-
+    // id: Option[Long], timestamp: String, eventType: String, count: Int)
+    val simpleEvent = new SimpleEvent(Some(100), timestamp, eventType, 0)
+    attribs match {
+      case Attribute("Timestamp", value) => val simpleEvent.timestamp = value.s.toString
+      case Attribute("Count", value) => val simpleEvent.count = 99
+      case Attribute("EventType", value) => val simpleEvent.eventType = value.s.toString
+      case _ => println("unknown")
+    }
+    simpleEvent
+  }
 
 
 
