@@ -25,17 +25,17 @@ import scala.collection.mutable.ArrayBuffer
  */
 object EventData {
   val testEvents = ArrayBuffer(
-    SimpleEvent(Some(1), "2015-06-30T12:00:00.000", "Green", 55),
-    SimpleEvent(Some(2), "2015-06-30T12:00:00.000", "Yellow", 100),
-    SimpleEvent(Some(3), "2015-06-30T12:00:00.000", "Blue", 300),
-    SimpleEvent(Some(4), "2015-06-30T12:00:00.000", "Red", 900),
-    SimpleEvent(Some(5), "2015-06-30T11:00:00.000", "Green", 215),
-    SimpleEvent(Some(6), "2015-06-30T11:00:00.000", "Yellow", 110),
-    SimpleEvent(Some(7), "2015-06-30T11:00:00.000", "Blue", 130),
-    SimpleEvent(Some(8), "2015-06-30T11:00:00.000", "Red", 190),
-    SimpleEvent(Some(9), "2015-06-30T10:00:00.000", "Green", 25),
-    SimpleEvent(Some(10), "2015-06-30T10:00:00.000", "Yellow", 210),
-    SimpleEvent(Some(11), "2015-06-30T10:00:00.000", "Blue", 230),
-    SimpleEvent(Some(12), "2015-06-30T10:00:00.000", "Red", 290)
+    SimpleEvent(Some(1), Some("2015-06-30T12:00:00.000"), Some("Green"), Some(55)),
+    SimpleEvent(Some(2), Some("2015-06-30T12:00:00.000"), Some("Yellow"), Some(100)),
+    SimpleEvent(Some(3), Some("2015-06-30T12:00:00.000"), Some("Blue"), Some(300)),
+    SimpleEvent(Some(4), Some("2015-06-30T12:00:00.000"), Some("Red"), Some(900)),
+    SimpleEvent(Some(5), Some("2015-06-30T11:00:00.000"), Some("Green"), Some(215)),
+    SimpleEvent(Some(6), Some("2015-06-30T11:00:00.000"), Some("Yellow"), Some(110)),
+    SimpleEvent(Some(7), Some("2015-06-30T11:00:00.000"), Some("Blue"), Some(130)),
+    SimpleEvent(Some(8), Some("2015-06-30T11:00:00.000"), Some("Red"), Some(190)),
+    SimpleEvent(Some(9), Some("2015-06-30T10:00:00.000"), Some("Green"), Some(25)),
+    SimpleEvent(Some(10), Some("2015-06-30T10:00:00.000"), Some("Yellow"), Some(210)),
+    SimpleEvent(Some(11), Some("2015-06-30T10:00:00.000"), Some("Blue"), Some(230)),
+    SimpleEvent(Some(12), Some("2015-06-30T10:00:00.000"), Some("Red"), Some(290))
   )
 }

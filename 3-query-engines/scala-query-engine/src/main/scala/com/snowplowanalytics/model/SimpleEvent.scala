@@ -14,7 +14,7 @@ package com.snowplowanalytics.model
 
 import spray.json.DefaultJsonProtocol
 
-case class SimpleEvent(id: Option[Long], timestamp: String, eventType: String, count: Int)
+case class SimpleEvent(id: Option[Long]=None, timestamp: Option[String]=None, eventType: Option[String]=None, count: Option[Int]=None)
 
 /**
  * Implements spray-json support so SimpleEvent case class can be marshalled
