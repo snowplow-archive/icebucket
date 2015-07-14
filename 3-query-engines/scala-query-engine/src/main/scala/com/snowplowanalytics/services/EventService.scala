@@ -102,10 +102,9 @@ object EventService {
   }
 
   def getEvents(): List[SimpleEvent] = {
-    val bucket = "2015-06-05T12:56:00.000"
-    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
-    val attribsOfFourElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    convertDataStage(attribsOfFourElements).toList
+    val startingTimestamp = "2015-06-05T12:54:00.000"
+    val endingTimestamp = "2015-06-05T12:56:00.000"
+    getEventsByBucketsBetweenTimestamps(startingTimestamp, endingTimestamp)
   }
 
   // provide "Red", "2015-06-20T12:32:00.00" and get count back
@@ -127,12 +126,18 @@ object EventService {
     timestampResult.flatMap(_.attributes.find(_.name == "EventType").map(_.value.s.get))
   }
 
+  def getEventsByBucketsBetweenTimestamps(startingTimestamp: String, endingTimestamp: String): List[SimpleEvent] = {
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(startingTimestamp, endingTimestamp)))
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    convertDataStage(attribsOfElements).toList
+  }
+
   def getEventsByBucket(timestamp: String): List[SimpleEvent] = {
     //val bucket = "2015-06-05T12:56:00.000"
     val bucket = timestamp
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
-    val attribsOfFourElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    convertDataStage(attribsOfFourElements).toList
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    convertDataStage(attribsOfElements).toList
   }
 
   def convertDataStage(myArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
