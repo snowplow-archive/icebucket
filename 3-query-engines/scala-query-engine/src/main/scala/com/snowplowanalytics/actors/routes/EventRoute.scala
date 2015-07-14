@@ -59,6 +59,11 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
           }
         }
       } ~
+      path(Segment) { timestamp =>
+        log.debug(s"Get bucket by timestamp: ${timestamp}")
+        val bucketedEvent = eventService.getEventsByBucket(timestamp)
+        complete(bucketedEvent)
+      } ~
       path(LongNumber) { eventId =>
         log.debug(s"Get Event by Id:${eventId}")
         val event = eventService.getEventById(eventId)

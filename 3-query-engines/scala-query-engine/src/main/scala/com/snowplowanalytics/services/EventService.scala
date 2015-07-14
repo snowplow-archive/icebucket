@@ -127,6 +127,14 @@ object EventService {
     timestampResult.flatMap(_.attributes.find(_.name == "EventType").map(_.value.s.get))
   }
 
+  def getEventsByBucket(timestamp: String): List[SimpleEvent] = {
+    //val bucket = "2015-06-05T12:56:00.000"
+    val bucket = timestamp
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
+    val attribsOfFourElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    convertDataStage(attribsOfFourElements).toList
+  }
+
   def convertDataStage(myArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
     var myList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
     for (a <- myArray) {
