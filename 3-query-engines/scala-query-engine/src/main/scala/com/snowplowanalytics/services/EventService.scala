@@ -18,63 +18,41 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
-import com.snowplowanalytics.services.EventData._
-
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.parallel.mutable
-
-//import com.amazonaws.services.dynamodbv2.model.{ScanRequest, ProjectionType, KeyType}
-//import com.sun.xml.internal.bind.v2.schemagen.xmlschema.AttributeType
-
 // Scala
-//import com.amazonaws.services.dynamodbv2._
-import awscala._
-import awscala.dynamodbv2._
-import spray.json._
-import com.amazonaws.services.{ dynamodbv2 => aws }
-
-// package import
-import com.snowplowanalytics.model.SimpleEvent
-
-
-// AWS Authentication
-// http://docs.aws.amazon.com/AWSJavaSDK/latest/javadoc/com/amazonaws/auth/DefaultAWSCredentialsProviderChain.html
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
-
-// AWS DynamoDB
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
-//import com.amazonaws.services.dynamodbv2.document.{Table, AttributeUpdate, DynamoDB, Item}
-
-
 import awscala._
 import awscala.dynamodbv2._
 import awscala.dynamodbv2.GlobalSecondaryIndex
 import com.amazonaws.services.{ dynamodbv2 => aws }
 import spray.json._
 
+// package import
+import com.snowplowanalytics.model.SimpleEvent
+import com.snowplowanalytics.services.EventData._
 
-// Scala
 
 /**
- * Object sets up singleton that finds AWS credentials for DynamoDB to access the
- * aggregation records table.
+ * EventService Object holds all the functions for DynamoDB access
  */
 object EventService {
 
-  val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-  val timezone = TimeZone.getTimeZone("UTC")
-
+  // sets DynamoDB client to us-east-1
   implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
 
+  // sets dynamodb table name
+  val tablename = "my-table"
+
+  // sets up table and dynamodb connection
+  val table: Table = dynamoDB.table(tablename).get
+
+  // sets various settings for global secondary index
+  val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+  val timezone = TimeZone.getTimeZone("UTC")
   val Hash = aws.model.KeyType.HASH
   val Range = aws.model.KeyType.RANGE
   val Include = aws.model.ProjectionType.INCLUDE
   val All = aws.model.ProjectionType.ALL
-  val tablename = "my-table"
-  val eventType = "Red"
-  val timestamp = "2015-06-05T12:56:00.000"
-  val table: Table = dynamoDB.table(tablename).get
 
+  // sets up table access to global secondary index with read write 10
   val globalSecondaryIndex = GlobalSecondaryIndex(
     name = "CountsIndex",
     keySchema = Seq(KeySchema("EventType", Hash), KeySchema("Timestamp", Range)),
@@ -91,21 +69,9 @@ object EventService {
     dateFormatter.format(new Date())
   }
 
-  def getEventsFilterGreen: List[SimpleEvent] = {
-    testEvents.toList.filter(x => x.eventType == "Green")
-  }
-
-  // provide "Red", "2015-06-20T12:32:00.00" and get count back
-  def getEvents5(): List[SimpleEvent] = {
-    println(getCountByEventTypeTimestamp(eventType, timestamp, table))
-    List(SimpleEvent(Some(123), Some("asdfasdf"), Some("asdfasdf"), Some(123)))
-  }
-
-  def getEvents(): List[SimpleEvent] = {
-    val startingTimestamp = "2015-06-05T12:54:00.000"
-    val endingTimestamp = "2015-06-05T12:56:00.000"
-    getEventsByBucketsBetweenTimestamps(startingTimestamp, endingTimestamp)
-  }
+  /**
+   * Function gets total count of all events that match time bucket
+   */
 
   // provide "Red", "2015-06-20T12:32:00.00" and get count back
   // getCountByEventTypeTimestamp(eventType, timestamp, table)
@@ -117,6 +83,9 @@ object EventService {
     findRedwithTimestamp.flatMap(_.attributes.find(_.name == "Count").map(_.value.n.get))
   }
 
+  /**
+   * Function gets unique list of events that match time bucket
+   */
   // val bucket = "2015-06-05T12:56:00.000"
   // getListOfEventsByTimestamp(bucket, table)
   // res2: Seq[String] = ArrayBuffer(Green, Blue, Red, Yellow)
@@ -126,22 +95,29 @@ object EventService {
     timestampResult.flatMap(_.attributes.find(_.name == "EventType").map(_.value.s.get))
   }
 
+  /**
+   * Function gets all events matching range between 2 time buckets in DynamoDB
+   */
   def getEventsByBucketsBetweenTimestamps(startingTimestamp: String, endingTimestamp: String): List[SimpleEvent] = {
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(startingTimestamp, endingTimestamp)))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     convertDataStage(attribsOfElements).toList
   }
 
+  /**
+   * Function gets all events matching to time bucket in DynamoDB
+   */
   def getEventsByBucket(timestamp: String): List[SimpleEvent] = {
     val pattern = """^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$""".r
-
-    //val bucket = "2015-06-05T12:56:00.000"
     val bucket = timestamp
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     convertDataStage(attribsOfElements).toList
   }
 
+  /**
+   * Helper Function for converting DynamoDB to SimpleEvent model
+   */
   def convertDataStage(myArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
     var myList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
     for (a <- myArray) {
@@ -152,6 +128,9 @@ object EventService {
     myList
   }
 
+  /**
+   * Helper Function for convertDataStage - unpacks DynamoDB table values
+   */
   def unpack(x: Any): String = x match {
     case Attribute("Count", value) => value.getN
     case Attribute("EventType", value) => value.getS
@@ -160,10 +139,10 @@ object EventService {
   }
 
   //////////////////////////////////////////////////////////////
-  // temp data and methods below
+  // Testing data and methods below
   //////////////////////////////////////////////////////////////
 
-  def getEvents2: List[SimpleEvent] = {
+  def getEvents(): List[SimpleEvent] = {
     testEvents.toList
   }
 
@@ -183,6 +162,10 @@ object EventService {
       case -1 => false
       case i => testEvents.update(i, event); true
     }
+  }
+
+  def getEventsFilterGreen: List[SimpleEvent] = {
+    testEvents.toList.filter(x => x.eventType == "Green")
   }
 
   def deleteEvent(id: Long): Unit = {

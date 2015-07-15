@@ -41,12 +41,14 @@ class ApiRouterActor(eventRoute: ActorRef) extends Actor
   with ActorLogging {
 
   def actorRefFactory = context
+
+  // main actor system sets up EventRoute.scala
   def receive = runRoute {
     compressResponseIfRequested() {
       pathPrefix("api") {
         pathPrefix("events") { ctx => eventRoute ! ctx }
       } ~
-        getFromResourceDirectory("dist")
+        getFromResourceDirectory("../../4-visualization/dist/")
     }
 
   }

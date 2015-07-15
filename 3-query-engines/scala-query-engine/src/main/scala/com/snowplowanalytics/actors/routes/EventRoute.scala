@@ -48,16 +48,17 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
   val log = LoggerFactory.getLogger(classOf[EventRouteTrait])
 
 
-  lazy val timeBuckets = path(Segment / Segment) { (beginTimestamp, endTimestamp) =>
-    log.debug(s"Get bucket begin: ${beginTimestamp},  Get bucket end: ${endTimestamp}")
-    val bucketedEvents = eventService.getEventsByBucketsBetweenTimestamps(beginTimestamp, endTimestamp)
-    complete(bucketedEvents)
-  }
 
   lazy val singleBucket =  path(Segment) { timestamp =>
     log.debug(s"Get bucket by timestamp: ${timestamp}")
     val bucketedEvent = eventService.getEventsByBucket(timestamp)
     complete(bucketedEvent)
+  }
+
+  lazy val timeBuckets = path(Segment / Segment) { (beginTimestamp, endTimestamp) =>
+    log.debug(s"Get bucket begin: ${beginTimestamp},  Get bucket end: ${endTimestamp}")
+    val bucketedEvents = eventService.getEventsByBucketsBetweenTimestamps(beginTimestamp, endTimestamp)
+    complete(bucketedEvents)
   }
 
   lazy val getAllTestData = pathEnd {
@@ -77,11 +78,12 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
     complete(event)
   }
 
+  // main function that handles routes to the EventService
   val eventRoute = {
     get {
-      getAllTestData ~
       singleBucket ~
       timeBuckets ~
+      getAllTestData ~
       getTestDataByEventID
     } ~
     (post & pathEnd) {
