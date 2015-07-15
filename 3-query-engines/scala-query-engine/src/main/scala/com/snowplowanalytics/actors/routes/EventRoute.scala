@@ -47,34 +47,42 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
   private val eventService = EventService
   val log = LoggerFactory.getLogger(classOf[EventRouteTrait])
 
+
+  lazy val timeBuckets = path(Segment / Segment) { (beginTimestamp, endTimestamp) =>
+    log.debug(s"Get bucket begin: ${beginTimestamp},  Get bucket end: ${endTimestamp}")
+    val bucketedEvents = eventService.getEventsByBucketsBetweenTimestamps(beginTimestamp, endTimestamp)
+    complete(bucketedEvents)
+  }
+
+  lazy val singleBucket =  path(Segment) { timestamp =>
+    log.debug(s"Get bucket by timestamp: ${timestamp}")
+    val bucketedEvent = eventService.getEventsByBucket(timestamp)
+    complete(bucketedEvent)
+  }
+
+  lazy val getAllTestData = pathEnd {
+    complete {
+      log.debug("Get All Events")
+      val events = eventService.getEvents
+      events match {
+        case head :: tail => events
+        case Nil => StatusCodes.NoContent
+      }
+    }
+  }
+
+  lazy val getTestDataByEventID = path(LongNumber) { eventId =>
+    log.debug(s"Get Event by Id:${eventId}")
+    val event = eventService.getEventById(eventId)
+    complete(event)
+  }
+
   val eventRoute = {
     get {
-      pathEnd {
-        complete {
-          log.debug("Get All Events")
-          val events = eventService.getEvents
-          events match {
-            case head :: tail => events
-            case Nil => StatusCodes.NoContent
-          }
-        }
-      } ~
-      path(Segment) { timestamp =>
-        log.debug(s"Get bucket by timestamp: ${timestamp}")
-        val bucketedEvent = eventService.getEventsByBucket(timestamp)
-        complete(bucketedEvent)
-      } ~
-      path(Segment / Segment) { (beginTimestamp, endTimestamp) =>
-        log.debug(s"Get bucket begin: ${beginTimestamp},  Get bucket end: ${endTimestamp}")
-        val bucketedEvents = eventService.getEventsByBucketsBetweenTimestamps(beginTimestamp, endTimestamp)
-
-        complete(bucketedEvents)
-      } ~
-      path(LongNumber) { eventId =>
-        log.debug(s"Get Event by Id:${eventId}")
-        val event = eventService.getEventById(eventId)
-        complete(event)
-      }
+      getAllTestData ~
+      singleBucket ~
+      timeBuckets ~
+      getTestDataByEventID
     } ~
     (post & pathEnd) {
       entity(as[SimpleEvent]) { event =>
