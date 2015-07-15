@@ -70,11 +70,8 @@ object EventService {
   }
 
   /**
-   * Function gets total count of all events that match time bucket
+   * Function gets total count of all events that match eventType and time bucket
    */
-
-  // provide "Red", "2015-06-20T12:32:00.00" and get count back
-  // getCountByEventTypeTimestamp(eventType, timestamp, table)
   def getCountByEventTypeTimestamp(eventType: String, timestamp: String, table: Table): Seq[String] = {
     val findRedwithTimestamp: Seq[Item] = table.queryWithIndex(
       index = globalSecondaryIndex,
@@ -85,10 +82,8 @@ object EventService {
 
   /**
    * Function gets unique list of events that match time bucket
+   * res2: Seq[String] = ArrayBuffer(Green, Blue, Red, Yellow)
    */
-  // val bucket = "2015-06-05T12:56:00.000"
-  // getListOfEventsByTimestamp(bucket, table)
-  // res2: Seq[String] = ArrayBuffer(Green, Blue, Red, Yellow)
   def getListOfEventsByTimestamp(bucket: String, table: Table): Seq[String] = {
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
     val attribsOfFourElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
@@ -118,14 +113,14 @@ object EventService {
   /**
    * Helper Function for converting DynamoDB to SimpleEvent model
    */
-  def convertDataStage(myArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
-    var myList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
-    for (a <- myArray) {
+  def convertDataStage(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
+    for (a <- dynamoArray) {
       val result = a.map(unpack)
       println(result)
-      myList += SimpleEvent(Some(result(0).toInt), result(1), result(3), result(0).toInt)
+      resultList += SimpleEvent(Some(result(0).toInt), result(1), result(3), result(0).toInt)
     }
-    myList
+    resultList
   }
 
   /**

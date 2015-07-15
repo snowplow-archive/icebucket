@@ -14,22 +14,20 @@ package com.snowplowanalytics.model
 
 import spray.json.DefaultJsonProtocol
 
-case class SimpleEvent(id: Option[Long], timestamp: String, eventType: String, count: Int
+case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: String)
 
 
-  {
-    "queryType": "timeseries",
-    "dataSource": "name_of_dynamodb_table_for_now",
-    "granularity": "day",
-    "intervals": [ "2012-01-01T00:00:00.000/2012-01-03T00:00:00.000" ]
-  }
+//  {
+//    "queryType": "timeseries",
+//    "dataSource": "name_of_dynamodb_table_for_now",
+//    "granularity": "day",
+//    "intervals": [ "2012-01-01T00:00:00.000/2012-01-03T00:00:00.000" ]
+//  }
 
 /**
- * Implements spray-json support so SimpleEvent case class can be marshalled
- * to/from json when accepting and completing requests.  By having this
- * marshaller in scope an HttpService can automatically handle things
- * like List[SimpleEvent] or Option[SimpleEvent]
+ * Implements spray-json support so DruidRequest case class can be marshalled
+ * to/from json when accepting and completing requests.
  */
-object SimpleEventJsonProtocol extends DefaultJsonProtocol {
-  implicit val eventFormat = jsonFormat4(SimpleEvent)
+object DruidRequestJsonProtocol extends DefaultJsonProtocol {
+  implicit val druidFormat = jsonFormat4(DruidRequest)
 }
