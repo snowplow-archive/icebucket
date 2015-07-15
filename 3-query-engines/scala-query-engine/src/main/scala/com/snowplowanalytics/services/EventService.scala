@@ -123,7 +123,7 @@ object EventService {
     for (a <- myArray) {
       val result = a.map(unpack)
       println(result)
-      myList += SimpleEvent(Some(result(0).toInt), result(1), result(3)), result(0).toInt)
+      myList += SimpleEvent(Some(result(0).toInt), result(1), result(3), result(0).toInt)
     }
     myList
   }
