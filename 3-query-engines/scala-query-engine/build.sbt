@@ -25,21 +25,16 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaV   = "2.3.4"
-  val sprayV  = "1.3.1"
+  val awsSdk = "1.9.34"
   Seq(
-    "com.amazonaws"       %   "aws-java-sdk"      % "1.10.2",
+    "com.amazonaws"       %   "aws-java-sdk"      % awsSdk,
     "com.github.seratch"  %%  "awscala"           % "0.5.+",
-    "io.spray"            %   "spray-servlet"     % sprayV,
-    "io.spray"            %   "spray-routing"     % sprayV,
-    "io.spray"            %   "spray-client"      % sprayV,
-    "io.spray"            %   "spray-util"        % sprayV,
-    "io.spray"            %   "spray-caching"     % sprayV,
-    "io.spray"            %   "spray-can"         % sprayV,
+    "io.spray"            %%  "spray-can"         % "1.3.3",
+    "io.spray"            %%  "spray-routing"     % "1.3.3",
     "io.spray"            %%  "spray-json"        % "1.3.2",
-    "com.typesafe.akka"   %%  "akka-slf4j"        % "2.3.4",
-    "ch.qos.logback"      %   "logback-classic"   % "1.1.3",
-    "com.typesafe.akka"   %%  "akka-actor"        % akkaV
+    "com.typesafe.akka"   %%  "akka-actor"        % "2.3.11",
+    "com.typesafe.akka"   %%  "akka-slf4j"        % "2.3.11",
+    "ch.qos.logback"      %   "logback-classic"   % "1.0.13"
   )
 }
 
