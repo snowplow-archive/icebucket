@@ -12,22 +12,15 @@
  */
 package com.snowplowanalytics.model
 
+import spray.httpx.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: String)
-
-
-//  {
-//    "queryType": "timeseries",
-//    "dataSource": "name_of_dynamodb_table_for_now",
-//    "granularity": "day",
-//    "intervals": [ "2012-01-01T00:00:00.000/2012-01-03T00:00:00.000" ]
-//  }
+case class DruidRequest(id: Option[Long], timestamp: String, eventType: String, count: Int)
 
 /**
  * Implements spray-json support so DruidRequest case class can be marshalled
  * to/from json when accepting and completing requests.
  */
-object DruidRequestJsonProtocol extends DefaultJsonProtocol {
+object DruidRequestJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val druidFormat = jsonFormat4(DruidRequest)
 }

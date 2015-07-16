@@ -26,7 +26,7 @@ import com.amazonaws.services.{ dynamodbv2 => aws }
 import spray.json._
 
 // package import
-import com.snowplowanalytics.model.SimpleEvent
+import com.snowplowanalytics.model.{DruidRequest, SimpleEvent}
 import com.snowplowanalytics.services.EventData._
 
 
@@ -88,6 +88,16 @@ object EventService {
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
     val attribsOfFourElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     timestampResult.flatMap(_.attributes.find(_.name == "EventType").map(_.value.s.get))
+  }
+
+  /**
+   * Function gets all events matching range between 2 time buckets in DynamoDB
+   */
+  def druidRequest(druidRequest: SimpleEvent): List[SimpleEvent] = {
+    println(druidRequest)
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-05T12:55:00.000", "2015-06-05T12:56:00.000")))
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    convertDataStage(attribsOfElements).toList
   }
 
   /**

@@ -12,7 +12,7 @@
  */
 package com.snowplowanalytics.actors.routes
 
-import com.snowplowanalytics.model.SimpleEvent
+import com.snowplowanalytics.model.{DruidRequest, SimpleEvent}
 import com.snowplowanalytics.model.SimpleEventJsonProtocol._
 import com.snowplowanalytics.services.EventService
 import akka.actor.Props
@@ -47,8 +47,6 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
   private val eventService = EventService
   val log = LoggerFactory.getLogger(classOf[EventRouteTrait])
 
-
-
   lazy val singleBucket =  path(Segment) { timestamp =>
     log.debug(s"Get bucket by timestamp: ${timestamp}")
     val bucketedEvent = eventService.getEventsByBucket(timestamp)
@@ -59,6 +57,14 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
     log.debug(s"Get bucket begin: ${beginTimestamp},  Get bucket end: ${endTimestamp}")
     val bucketedEvents = eventService.getEventsByBucketsBetweenTimestamps(beginTimestamp, endTimestamp)
     complete(bucketedEvents)
+  }
+
+  lazy val postDruidRequest = (post & pathEnd) {
+    entity(as[SimpleEvent]) { event =>
+      log.debug("Druid Event")
+      val newEvent = eventService.druidRequest(event)
+      complete(StatusCodes.Created, newEvent)
+    }
   }
 
   lazy val getAllTestData = pathEnd {
@@ -78,6 +84,32 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
     complete(event)
   }
 
+  lazy val createEvent = (post & pathEnd) {
+    entity(as[SimpleEvent]) { event =>
+      log.debug("Create an Event")
+      val newEvent = eventService.addEvent(event)
+      complete(StatusCodes.Created, newEvent)
+    }
+  }
+
+  lazy val updateEvent = (put & path(LongNumber) & pathEnd) { eventId =>
+    entity(as[SimpleEvent]) { event =>
+      log.debug(s"Update an Event with the id: ${eventId}")
+      val updatedEvent = eventService.updateEvent(event.copy(id = Some(eventId)))
+      updatedEvent match {
+        case true => complete(StatusCodes.NoContent)
+        case false => complete(StatusCodes.NotFound)
+      }
+    }
+  }
+
+  lazy val deleteEvent = (delete & path(LongNumber) & pathEnd) { eventId =>
+    log.debug(s"Delete an Event with the id: ${eventId}")
+    eventService.deleteEvent(eventId)
+    complete(StatusCodes.NoContent)
+  }
+
+
   // main function that handles routes to the EventService
   val eventRoute = {
     get {
@@ -86,28 +118,9 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport{
       getAllTestData ~
       getTestDataByEventID
     } ~
-    (post & pathEnd) {
-      entity(as[SimpleEvent]) { event =>
-        log.debug("Create an Event")
-        val newEvent = eventService.addEvent(event)
-        complete(StatusCodes.Created, newEvent)
-      }
-    } ~
-    (put & path(LongNumber) & pathEnd) { eventId =>
-      entity(as[SimpleEvent]) { event =>
-        log.debug(s"Update an Event with the id: ${eventId}")
-        val updatedEvent = eventService.updateEvent(event.copy(id = Some(eventId)))
-        updatedEvent match {
-          case true => complete(StatusCodes.NoContent)
-          case false => complete(StatusCodes.NotFound)
-        }
-      }
-    } ~
-    (delete & path(LongNumber) & pathEnd) { eventId =>
-       log.debug(s"Delete an Event with the id: ${eventId}")
-      eventService.deleteEvent(eventId)
-      complete(StatusCodes.NoContent)
-    }
+    postDruidRequest ~
+    updateEvent ~
+    deleteEvent
   }
 
 }
