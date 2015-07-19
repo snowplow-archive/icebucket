@@ -15,11 +15,14 @@ package com.snowplowanalytics.model
 import spray.httpx.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-case class DruidRequest(id: Option[Long], timestamp: String, eventType: String, count: Int)
+
+case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: String)
 
 /**
- * Implements spray-json support so DruidRequest case class can be marshalled
- * to/from json when accepting and completing requests.
+ * Implements spray-json support so SimpleEvent case class can be marshalled
+ * to/from json when accepting and completing requests. By having this
+ * marshaller in scope an HttpService can automatically handle things
+ * like List[SimpleEvent] or Option[SimpleEvent]
  */
 object DruidRequestJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val druidFormat = jsonFormat4(DruidRequest)

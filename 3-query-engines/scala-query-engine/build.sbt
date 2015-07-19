@@ -28,6 +28,7 @@ libraryDependencies ++= {
   val awsSdk = "1.9.34"
   Seq(
     "com.amazonaws"       %   "aws-java-sdk"      % awsSdk,
+    "org.clapper"         %%  "argot"             % "1.0.3",
     "com.github.seratch"  %%  "awscala"           % "0.5.+",
     "io.spray"            %%  "spray-can"         % "1.3.3",
     "io.spray"            %%  "spray-routing"     % "1.3.3",

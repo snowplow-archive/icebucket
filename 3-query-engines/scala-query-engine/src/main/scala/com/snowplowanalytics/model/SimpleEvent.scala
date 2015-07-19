@@ -12,17 +12,34 @@
  */
 package com.snowplowanalytics.model
 
+import spray.json._
 import spray.httpx.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-case class SimpleEvent(id: Option[Long], timestamp: String, eventType: String, count: Int)
+case class SimpleEvent(id: Option[Int], timestamp: String, eventType: String, count: Int)
 
 /**
  * Implements spray-json support so SimpleEvent case class can be marshalled
- * to/from json when accepting and completing requests.  By having this
+ * to/from json when accepting and completing requests. By having this
  * marshaller in scope an HttpService can automatically handle things
  * like List[SimpleEvent] or Option[SimpleEvent]
  */
-object SimpleEventJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val eventFormat = jsonFormat4(SimpleEvent)
+object SimpleEventJsonProtocol extends DefaultJsonProtocol {
+
+  //implicit val eventFormat = jsonFormat4(SimpleEvent)
+  implicit object eventFormat extends RootJsonFormat[SimpleEvent] {
+    def write(c: SimpleEvent) = JsObject(
+      "timestamp" -> JsString(c.timestamp),
+      "eventType" -> JsString(c.eventType),
+      "count" -> JsNumber(c.count)
+    )
+
+    def read(value: JsValue) = {
+      value.asJsObject.getFields("timestamp", "eventType", "count") match {
+        case Seq(JsString(timestamp), JsString(eventType), JsNumber(count)) =>
+          SimpleEvent(Some(123), timestamp, eventType, count.toInt)
+        case _ => throw new DeserializationException("SimpleEvent expected")
+      }
+    }
+  }
 }

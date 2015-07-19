@@ -14,20 +14,43 @@
 
 import akka.io.IO
 import spray.can.Http
-import ActorSystemBean._
+import ActorServiceSystem._
 
-/**
- * Gets an actor system from the ActorSystemBean and initializes
+// Argot
+import org.clapper.argot._
+import org.clapper.argot.ArgotConverters._
+
+ /**
+ * Gets an actor system from the ActorServiceSystem and initializes
  * a stand alone spray-can http server with it.
- *
- * @see [[com.snowplowanalytics.actors.config.ActorSystemBean]]
  */
 object Boot extends App {
 
-  val services = ActorSystemBean()
+  // configuration parse
+  val parser = new ArgotParser(
+   programName = "generated.ProjectSettings.name",
+   compactUsage = true,
+   preUsage = Some("%s: Version %s. Copyright (c) 2015, %s.".format(
+     "Project Icebucket",
+     "1.0",
+     "Snowplow Analytics")
+   )
+  )
+
+  val portArgument = parser.option[Int](List("port"), "n", "TCP port to run Web UI (default: 8080)")
+  val interfaceArgument = parser.option[String](List("interface"), "interface", "Interface to bind Web UI (default: 0.0.0.0)")
+
+  parser.parse(args)
+
+  val port: Int = portArgument.value.getOrElse(8080)
+  val interface: String = interfaceArgument.value.getOrElse("0.0.0.0")
+
+
+  // main function starting Spray Application and Actor service
+  val services = ActorServiceSystem()
   implicit val system = services.system
   val service = services.apiRouterActor
 
-  IO(Http) ! Http.Bind(service, interface = "0.0.0.0", port = 8080)
+  IO(Http) ! Http.Bind(service, interface = interface, port = port)
 
 }

@@ -24,9 +24,12 @@ import awscala.dynamodbv2._
 import awscala.dynamodbv2.GlobalSecondaryIndex
 import com.amazonaws.services.{ dynamodbv2 => aws }
 import spray.json._
+import spray.httpx.SprayJsonSupport._
+import spray.json.DefaultJsonProtocol._
+
 
 // package import
-import com.snowplowanalytics.model.{DruidRequest, SimpleEvent}
+import com.snowplowanalytics.model.{SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
 import com.snowplowanalytics.services.EventData._
 
 
@@ -93,11 +96,11 @@ object EventService {
   /**
    * Function gets all events matching range between 2 time buckets in DynamoDB
    */
-  def druidRequest(druidRequest: SimpleEvent): List[SimpleEvent] = {
+  def druidRequest(druidRequest: DruidRequest): String = {
     println(druidRequest)
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-05T12:55:00.000", "2015-06-05T12:56:00.000")))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    convertDataStage(attribsOfElements).toList
+    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
   }
 
   /**
@@ -112,12 +115,12 @@ object EventService {
   /**
    * Function gets all events matching to time bucket in DynamoDB
    */
-  def getEventsByBucket(timestamp: String): List[SimpleEvent] = {
+  def getEventsByBucket(timestamp: String) {
     val pattern = """^([\+-]?\d{4}(?!\d{2}\b))((-?)((0[1-9]|1[0-2])(\3([12]\d|0[1-9]|3[01]))?|W([0-4]\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\d|[12]\d{2}|3([0-5]\d|6[1-6])))([T\s]((([01]\d|2[0-3])((:?)[0-5]\d)?|24\:?00)([\.,]\d+(?!:))?)?(\17[0-5]\d([\.,]\d+)?)?([zZ]|([\+-])([01]\d|2[0-3]):?([0-5]\d)?)?)?)?$""".r
     val bucket = timestamp
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.eq(bucket)))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    convertDataStage(attribsOfElements).toList
+    serialize(convertDataStage(attribsOfElements).toList)
   }
 
   /**
@@ -131,6 +134,12 @@ object EventService {
       resultList += SimpleEvent(Some(result(0).toInt), result(1), result(3), result(0).toInt)
     }
     resultList
+  }
+
+
+  def serialize(events: List[SimpleEvent]): List[spray.json.JsObject] = {
+    for (event <- events)
+      yield SimpleEventJsonProtocol.eventFormat.write(event)
   }
 
   /**
