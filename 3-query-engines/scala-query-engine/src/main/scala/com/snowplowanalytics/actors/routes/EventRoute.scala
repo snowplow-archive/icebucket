@@ -65,10 +65,6 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
   }
 
   def postDruidRequest = post {
-
-    import spray.httpx.SprayJsonSupport
-    import spray.json.DefaultJsonProtocol
-
     path ("druid"){
       entity(as[DruidRequest]) { druidEvent =>
         log.debug(s"Druid Event ${druidEvent}")

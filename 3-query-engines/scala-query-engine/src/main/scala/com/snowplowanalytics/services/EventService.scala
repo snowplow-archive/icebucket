@@ -18,6 +18,8 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
+import scala.collection.mutable.ArrayBuffer
+
 // Scala
 import awscala._
 import awscala.dynamodbv2._
@@ -93,15 +95,6 @@ object EventService {
     timestampResult.flatMap(_.attributes.find(_.name == "EventType").map(_.value.s.get))
   }
 
-  /**
-   * Function gets all events matching range between 2 time buckets in DynamoDB
-   */
-  def druidRequest(druidRequest: DruidRequest): String = {
-    println(druidRequest)
-    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-05T12:55:00.000", "2015-06-05T12:56:00.000")))
-    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
-  }
 
   /**
    * Function gets all events matching range between 2 time buckets in DynamoDB
@@ -110,6 +103,17 @@ object EventService {
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(startingTimestamp, endingTimestamp)))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     convertDataStage(attribsOfElements).toList
+  }
+
+
+  /**
+   * Function gets all events as Individual Items matching range between 2 time buckets in DynamoDB
+   */
+  def druidRequestIndividualItems(druidRequest: DruidRequest): String = {
+    val intervals = druidRequest.intervals.split("/")
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(0))))
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
   }
 
   /**
@@ -123,6 +127,18 @@ object EventService {
     serialize(convertDataStage(attribsOfElements).toList)
   }
 
+
+  /**
+   * Function gets all events matching range between 2 time buckets in DynamoDB
+   */
+  def druidRequest(druidRequest: DruidRequest): String = {
+    val intervals = druidRequest.intervals.split("/")
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
+  }
+
+
   /**
    * Helper Function for converting DynamoDB to SimpleEvent model
    */
@@ -131,12 +147,38 @@ object EventService {
     for (a <- dynamoArray) {
       val result = a.map(unpack)
       println(result)
-      resultList += SimpleEvent(Some(result(0).toInt), result(1), result(3), result(0).toInt)
+      resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
     }
     resultList
   }
 
 
+  /**
+   * Function takes collection of SimpleEvents and returns a DruidResponse
+   */
+  def countDruidResponse(eventArray: scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent]):
+    Map[String, ArrayBuffer[(String, Int)]] = {
+
+      // take in the collection
+      // create temporary map
+      var timestamps = scala.collection.mutable.Map[String, scala.collection.mutable.ListBuffer[String]]()
+      // for (event <- events)
+      // create a map and add eventType and count to 'result'
+      // return  timestamp and result to
+
+      val groupByTimestamp = eventArray.groupBy(_.timestamp)
+      val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => (x.eventType, x.count)))
+      typeAndCountExtracted
+  }
+
+
+
+
+
+
+  /**
+   * Helper Function for custom marshaller for SimpleEvent model
+   */
   def serialize(events: List[SimpleEvent]): List[spray.json.JsObject] = {
     for (event <- events)
       yield SimpleEventJsonProtocol.eventFormat.write(event)
