@@ -156,19 +156,10 @@ object EventService {
   /**
    * Function takes collection of SimpleEvents and returns a DruidResponse
    */
-  def countDruidResponse(eventArray: scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent]):
-    Map[String, ArrayBuffer[(String, Int)]] = {
-
-      // take in the collection
-      // create temporary map
-      var timestamps = scala.collection.mutable.Map[String, scala.collection.mutable.ListBuffer[String]]()
-      // for (event <- events)
-      // create a map and add eventType and count to 'result'
-      // return  timestamp and result to
-
-      val groupByTimestamp = eventArray.groupBy(_.timestamp)
-      val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => (x.eventType, x.count)))
-      typeAndCountExtracted
+  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]): Map[String,List[(String, Int)]] = {
+    val groupByTimestamp = eventArray.groupBy(_.timestamp)
+    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => (x.eventType, x.count)))
+    typeAndCountExtracted
   }
 
 
