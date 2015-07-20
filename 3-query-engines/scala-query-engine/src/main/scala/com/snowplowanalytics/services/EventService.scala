@@ -156,10 +156,10 @@ object EventService {
   /**
    * Function takes collection of SimpleEvents and returns a DruidResponse
    */
-  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]): Map[String,List[(String, Int)]] = {
+  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]): String = {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
-    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => (x.eventType, x.count)))
-    typeAndCountExtracted
+    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
+    typeAndCountExtracted.toJson.toString
   }
 
 
