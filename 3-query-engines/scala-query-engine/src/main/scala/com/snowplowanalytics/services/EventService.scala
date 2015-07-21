@@ -31,7 +31,7 @@ import spray.json.DefaultJsonProtocol._
 
 
 // package import
-import com.snowplowanalytics.model.{SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
+import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
 import com.snowplowanalytics.services.EventData._
 
 
@@ -130,12 +130,13 @@ object EventService {
 
   /**
    * Function gets all events matching range between 2 time buckets in DynamoDB
+   * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
   def druidRequest(druidRequest: DruidRequest): String = {
     val intervals = druidRequest.intervals.split("/")
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
+    countDruidResponse(convertDataStage(attribsOfElements).toList).toString
   }
 
 
@@ -156,13 +157,17 @@ object EventService {
   /**
    * Function takes collection of SimpleEvents and returns a DruidResponse
    */
-  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]): String = {
+  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
-    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
-    typeAndCountExtracted.toJson.toString
+    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count.toString)))
+    typeAndCountExtracted map {
+      keyVal => {
+        val k = keyVal._1.toJson
+        val v = keyVal._2.toJson
+        JsObject("timestamp" -> k, "result" -> v)
+      }
+    }
   }
-
-
 
 
 
