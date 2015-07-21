@@ -136,7 +136,7 @@ object EventService {
     val intervals = druidRequest.intervals.split("/")
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    countDruidResponse(convertDataStage(attribsOfElements).toList).toString
+    countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
   }
 
 
@@ -155,7 +155,7 @@ object EventService {
 
 
   /**
-   * Function takes collection of SimpleEvents and returns a DruidResponse
+   * Function takes collection of SimpleEvents and returns a JSON DruidResponse
    */
   def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
