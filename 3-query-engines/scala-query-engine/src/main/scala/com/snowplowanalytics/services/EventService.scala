@@ -159,7 +159,7 @@ object EventService {
    */
   def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
-    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count.toString)))
+    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
     typeAndCountExtracted map {
       keyVal => {
         val k = keyVal._1.toJson
