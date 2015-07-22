@@ -110,8 +110,8 @@ object EventService {
    * Function gets all events as Individual Items matching range between 2 time buckets in DynamoDB
    */
   def druidRequestIndividualItems(druidRequest: DruidRequest): String = {
-    val intervals = druidRequest.intervals.split("/")
-    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(0))))
+    val intervals = druidRequest.intervals(0).split("/")
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     serialize(convertDataStage(attribsOfElements).toList).toJson.toString
   }
@@ -133,7 +133,8 @@ object EventService {
    * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
   def druidRequest(druidRequest: DruidRequest): String = {
-    val intervals = druidRequest.intervals.split("/")
+    val intervals = druidRequest.intervals(0).split("/")
+    val table: Table = dynamoDB.table(druidRequest.dataSource).get
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
