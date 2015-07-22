@@ -16,7 +16,7 @@ import spray.httpx.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
 
-case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: String)
+case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: List[String])
 
 /**
  * Implements spray-json support so DruidRequest case class can be marshalled
