@@ -140,6 +140,28 @@ object EventService {
     countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
   }
 
+  /**
+   * Helper Function for HOUR query plan for DynamoDB
+   */
+  def hour(){}
+  // if hours
+  // check range hours check consecutive
+  // add end of the hour 
+  // 08:00 - 14:00
+  // only up to 00:23:59
+  // 08:00 - 14:59
+  // x <
+  // convert times into hour buckets
+  // aggregate
+  // return data to API
+
+
+
+  /**
+   * Helper Function for DAY query plan for DynamoDB
+   */
+  def day(){}
+
 
   /**
    * Helper Function for converting DynamoDB to SimpleEvent model
