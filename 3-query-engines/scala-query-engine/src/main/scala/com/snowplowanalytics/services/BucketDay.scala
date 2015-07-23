@@ -37,6 +37,7 @@ object BucketingStrategyDay {
 
   private val BucketToDayFormatter = new SimpleDateFormat("yyyy-MM-dd'T'23:59:59.000")
   private val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+  private val AggregateDayFormatter = new SimpleDateFormat("yyyy-MM-dd'T'00:00:00.000")
 
   /**
    * Function to bucket a string version of
@@ -51,4 +52,10 @@ object BucketingStrategyDay {
     val parsed = format.parse(dateString)
     BucketToDayFormatter.format(parsed)
   }
+
+  def downsample(dateString: String): String = {
+    val parsed = format.parse(dateString)
+    AggregateDayFormatter.format(parsed)
+  }
+
 }

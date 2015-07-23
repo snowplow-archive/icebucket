@@ -18,8 +18,6 @@ import java.util.Date
 import java.util.TimeZone
 import java.text.SimpleDateFormat
 
-import scala.collection.mutable.ArrayBuffer
-
 // Scala
 import awscala._
 import awscala.dynamodbv2._
@@ -33,8 +31,7 @@ import spray.json.DefaultJsonProtocol._
 // package import
 import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
 import com.snowplowanalytics.services.EventData._
-import com.snowplowanalytics.services.BucketingStrategyDay
-import com.snowplowanalytics.services.BucketingStrategyHour
+
 
 /**
  * EventService Object holds all the functions for DynamoDB access
@@ -136,23 +133,23 @@ object EventService {
   def druidRequest(druidRequest: DruidRequest): String = {
     val intervals = druidRequest.intervals(0).split("/")
     val table: Table = dynamoDB.table(druidRequest.dataSource).get
-    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
-    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    if (druidRequest.granularity == "minute") {
-      countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
-    } else if (druidRequest.granularity == "hour") {
-      if (intervals(0) <= intervals(1)) {
-        val timestampResultHour: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyHour.bucket(intervals(1)))))
-
-      }
+    if (druidRequest.granularity == "hour") {
+      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyHour.bucket(intervals(1)))))
+      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+      countDruidResponse(convertDataStageHour(attribsOfElements).toList).toJson.toString
+      // parse all timestamps by hour - normalize
+      // aggregate by hour
     } else if (druidRequest.granularity == "day"){
-      if (intervals(0) <= intervals(1)) {
-        val timestampResultHour: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
-      }
+      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
+      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+      countDruidResponse(convertDataStageDay(attribsOfElements).toList).toJson.toString
+      // parse all timestamps by day - normalize
+      // aggregate by day
     } else {
+      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
+      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
       countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
     }
-
   }
 
   /**
@@ -162,6 +159,32 @@ object EventService {
     var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
     for (a <- dynamoArray) {
       val result = a.map(unpack)
+      println(result)
+      resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+    }
+    resultList
+  }
+
+  /**
+   * Helper Function for converting DynamoDB to SimpleEvent model
+   */
+  def convertDataStageHour(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
+    for (a <- dynamoArray) {
+      val result = a.map(unpackHour)
+      println(result)
+      resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+    }
+    resultList
+  }
+
+  /**
+   * Helper Function for converting DynamoDB to SimpleEvent model
+   */
+  def convertDataStageDay(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
+    for (a <- dynamoArray) {
+      val result = a.map(unpackDay)
       println(result)
       resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
     }
@@ -184,9 +207,6 @@ object EventService {
     }
   }
 
-
-
-
   /**
    * Helper Function for custom marshaller for SimpleEvent model
    */
@@ -202,6 +222,20 @@ object EventService {
     case Attribute("Count", value) => value.getN
     case Attribute("EventType", value) => value.getS
     case Attribute("Timestamp", value) => value.getS
+    case Attribute("CreatedAt", value) => value.getN
+  }
+
+  def unpackHour(x: Any): String = x match {
+    case Attribute("Count", value) => value.getN
+    case Attribute("EventType", value) => value.getS
+    case Attribute("Timestamp", value) => BucketingStrategyHour.downsample(value.getS)
+    case Attribute("CreatedAt", value) => value.getN
+  }
+
+  def unpackDay(x: Any): String = x match {
+    case Attribute("Count", value) => value.getN
+    case Attribute("EventType", value) => value.getS
+    case Attribute("Timestamp", value) => BucketingStrategyDay.downsample(value.getS)
     case Attribute("CreatedAt", value) => value.getN
   }
 

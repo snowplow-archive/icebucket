@@ -36,6 +36,7 @@ object BucketingStrategyHour {
 
   private val BucketToHourFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:59:59.000")
   private val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+  private val AggregateHourFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:00:00.000")
 
   /**
    * Function to bucket a string version of
@@ -49,5 +50,10 @@ object BucketingStrategyHour {
   def bucket(dateString: String): String = {
     val parsed = format.parse(dateString)
     BucketToHourFormatter.format(parsed)
+  }
+
+  def downsample(dateString: String): String = {
+    val parsed = format.parse(dateString)
+    AggregateHourFormatter.format(parsed)
   }
 }
