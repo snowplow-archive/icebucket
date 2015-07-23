@@ -35,18 +35,20 @@ import java.text.SimpleDateFormat
  */
 object BucketingStrategyDay {
 
-  private val BucketToDayFormatter = new SimpleDateFormat("yyyy-MM-dd'T'00:00:00.000")
+  private val BucketToDayFormatter = new SimpleDateFormat("yyyy-MM-dd'T'23:59:59.000")
+  private val format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
 
   /**
-   * Function to bucket a date based on
-   * our bucketing strategy. Bucketing
-   * means downsampling aka reducing
+   * Function to bucket a string version of
+   * date based on our bucketing strategy.
+   * Bucketing means downsampling aka reducing
    * precision.
    *
-   * @param date The Java Date to bucket
    * @return the downsampled date in String
    *         format
    */
-  def bucket(date: Date): String =
-    BucketToDayFormatter.format(date)
+  def bucket(dateString: String): String = {
+    val parsed = format.parse(dateString)
+    BucketToDayFormatter.format(parsed)
+  }
 }

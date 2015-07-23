@@ -33,7 +33,8 @@ import spray.json.DefaultJsonProtocol._
 // package import
 import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
 import com.snowplowanalytics.services.EventData._
-
+import com.snowplowanalytics.services.BucketingStrategyDay
+import com.snowplowanalytics.services.BucketingStrategyHour
 
 /**
  * EventService Object holds all the functions for DynamoDB access
@@ -137,31 +138,22 @@ object EventService {
     val table: Table = dynamoDB.table(druidRequest.dataSource).get
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
+    if (druidRequest.granularity == "minute") {
+      countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
+    } else if (druidRequest.granularity == "hour") {
+      if (intervals(0) <= intervals(1)) {
+        val timestampResultHour: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyHour.bucket(intervals(1)))))
+
+      }
+    } else if (druidRequest.granularity == "day"){
+      if (intervals(0) <= intervals(1)) {
+        val timestampResultHour: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
+      }
+    } else {
+      countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
+    }
+
   }
-
-  /**
-   * Helper Function for HOUR query plan for DynamoDB
-   */
-  def hour(){}
-  // if hours
-  // check range hours check consecutive
-  // add end of the hour 
-  // 08:00 - 14:00
-  // only up to 00:23:59
-  // 08:00 - 14:59
-  // x <
-  // convert times into hour buckets
-  // aggregate
-  // return data to API
-
-
-
-  /**
-   * Helper Function for DAY query plan for DynamoDB
-   */
-  def day(){}
-
 
   /**
    * Helper Function for converting DynamoDB to SimpleEvent model
