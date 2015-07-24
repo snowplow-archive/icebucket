@@ -52,18 +52,6 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
   private val eventService = EventService
   val log = LoggerFactory.getLogger(classOf[EventRouteTrait])
 
-
-
-  def postSimpleRequest = post {
-    path ("simple"){
-      entity(as[SimpleEvent]) { simpleEvent =>
-        log.debug(s"Simple Event ${simpleEvent}")
-        //val druidEvents = eventService.druidRequest(simpleEvent)
-        complete(<h1>Simple</h1>)
-      }
-    }
-  }
-
   def postDruidRequest = post {
     path ("druid"){
       entity(as[DruidRequest]) { druidEvent =>
@@ -77,7 +65,6 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
 
   // main function that handles routes to the EventService
   val eventRoute = {
-    postSimpleRequest ~
     postDruidRequest
   }
 

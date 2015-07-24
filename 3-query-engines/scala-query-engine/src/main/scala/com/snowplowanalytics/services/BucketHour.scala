@@ -39,19 +39,20 @@ object BucketingStrategyHour {
   private val AggregateHourFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:00:00.000")
 
   /**
-   * Function to bucket a string version of
-   * date based on our bucketing strategy.
+   * Function formats date string to bucket query plan
+   * based on our bucketing strategy of 1 hour buckets.
    * Bucketing means downsampling aka reducing
    * precision.
-   *
-   * @return the downsampled date in String
-   *         format
    */
   def bucket(dateString: String): String = {
     val parsed = format.parse(dateString)
     BucketToHourFormatter.format(parsed)
   }
 
+  /**
+   * Function formats DynamoDB date string to aggregration buckets
+   * based on our bucketing strategy of 1 hour buckets.
+   */
   def downsample(dateString: String): String = {
     val parsed = format.parse(dateString)
     AggregateHourFormatter.format(parsed)

@@ -40,19 +40,22 @@ object BucketingStrategyDay {
   private val AggregateDayFormatter = new SimpleDateFormat("yyyy-MM-dd'T'00:00:00.000")
 
   /**
-   * Function to bucket a string version of
-   * date based on our bucketing strategy.
+   * Function formats date string to query plan
+   * for a bucketing strategy of 1 day buckets.
    * Bucketing means downsampling aka reducing
    * precision.
-   *
-   * @return the downsampled date in String
-   *         format
    */
   def bucket(dateString: String): String = {
     val parsed = format.parse(dateString)
     BucketToDayFormatter.format(parsed)
   }
 
+  /**
+   * Function downsamples DyanmoDB item date to 1 day buckets
+   * for aggregation.
+   * Bucketing means downsampling aka reducing
+   * precision.
+   */
   def downsample(dateString: String): String = {
     val parsed = format.parse(dateString)
     AggregateDayFormatter.format(parsed)
