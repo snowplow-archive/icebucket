@@ -13,9 +13,10 @@
 package com.snowplowanalytics.services
 
 // Scala
-import awscala.dynamodbv2._
 import spray.json._
+import awscala.dynamodbv2._
 import spray.json.DefaultJsonProtocol._
+import com.twitter.algebird.Operators._
 
 // package import
 import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
@@ -73,6 +74,22 @@ object Aggregation {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
     val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
     typeAndCountExtracted map {
+      keyVal => {
+        val k = keyVal._1.toJson
+        val v = keyVal._2.toJson
+        JsObject("timestamp" -> k, "result" -> v)
+      }
+    }
+  }
+
+  /**
+   * Function takes collection of SimpleEvents and returns a JSON DruidResponse
+   */
+  def countHourlyDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
+    val groupByTimestamp = eventArray.groupBy(_.timestamp)
+    val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
+    val aggregateMaps = typeAndCountExtracted.mapValues( _.reduce(_+_))
+    aggregateMaps map {
       keyVal => {
         val k = keyVal._1.toJson
         val v = keyVal._2.toJson

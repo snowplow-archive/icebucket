@@ -72,13 +72,11 @@ object EventService {
     if (druidRequest.granularity == "hour") {
       val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyHour.bucket(intervals(1)))))
       val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-      countDruidResponse(convertDataStageHour(attribsOfElements).toList).toJson.toString
-      // parse all timestamps by hour - normalize
-      // aggregate by hour
+      countHourlyDruidResponse(convertDataStageHour(attribsOfElements).toList).toJson.toString
     } else if (druidRequest.granularity == "day"){
       val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
       val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-      countDruidResponse(convertDataStageDay(attribsOfElements).toList).toJson.toString
+      countHourlyDruidResponse(convertDataStageDay(attribsOfElements).toList).toJson.toString
       // parse all timestamps by day - normalize
       // aggregate by day
     } else {
@@ -87,7 +85,7 @@ object EventService {
       countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
     }
   }
-  
+
   //////////////////////////////////////////////////////////////
   // Testing data and methods below
   //////////////////////////////////////////////////////////////
