@@ -46,8 +46,14 @@ class EventRoute() extends Actor with EventRouteTrait {
  */
 trait EventRouteTrait extends HttpService with SprayJsonSupport {
 
-  import com.snowplowanalytics.model.SimpleEventJsonProtocol._
+  import com.snowplowanalytics.model.SimpleEventJsonProtocol
   import com.snowplowanalytics.model.DruidRequestJsonProtocol._
+
+
+  import spray.json._
+  import spray.httpx.SprayJsonSupport
+  import spray.json.DefaultJsonProtocol
+
 
   private val eventService = EventService
   val log = LoggerFactory.getLogger(classOf[EventRouteTrait])
@@ -65,6 +71,14 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
 
   // main function that handles routes to the EventService
   val eventRoute = {
+    get {
+      pathEnd {
+        complete {
+          implicit val eventFormat = jsonFormat4(SimpleEvent)
+          eventService.getEvents
+        }
+      }
+    } ~
     postDruidRequest
   }
 

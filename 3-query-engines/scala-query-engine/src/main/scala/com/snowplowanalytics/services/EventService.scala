@@ -86,13 +86,18 @@ object EventService {
     }
   }
 
+  def getEvents(): String = {
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-04T10:00:00.000", "2015-06-10T14:00:00.000")))
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
+  }
   //////////////////////////////////////////////////////////////
   // Testing data and methods below
   //////////////////////////////////////////////////////////////
 
-  def getEvents(): List[SimpleEvent] = {
-    testEvents.toList
-  }
+  //def getEvents(): List[SimpleEvent] = {
+  //  testEvents.toList
+  //}
 
   def getEventById(eventId: Long): Option[SimpleEvent] = {
     testEvents find (_.id == Some(eventId))

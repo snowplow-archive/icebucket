@@ -48,7 +48,7 @@ class ApiRouterActor(eventRoute: ActorRef) extends Actor
       pathPrefix("api") {
         pathPrefix("events") { ctx => eventRoute ! ctx }
       } ~
-        getFromResourceDirectory("../../4-visualization/dist/")
+        getFromResourceDirectory("dist/")
     }
 
   }
