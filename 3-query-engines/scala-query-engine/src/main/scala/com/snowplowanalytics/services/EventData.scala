@@ -12,11 +12,11 @@
  */
 package com.snowplowanalytics.services
 
-import com.snowplowanalytics.model.SimpleEvent
+import com.snowplowanalytics.model.AggregationDynamoDB
 import scala.collection.mutable.ArrayBuffer
 
 /**
- * SimpleEvent data stored in a mutable array for demonstration purposes.
+ * AggregationDynamoDB data stored in a mutable array for demonstration purposes.
  * This would normally be replaced by a DAO layer that makes calls to
  * a database or external service that persists person data.
  *
@@ -25,17 +25,17 @@ import scala.collection.mutable.ArrayBuffer
  */
 object EventData {
   val testEvents = ArrayBuffer(
-    SimpleEvent(Some(1), "2015-06-30T12:00:00.000", "Green", 55),
-    SimpleEvent(Some(2), "2015-06-30T12:00:00.000", "Yellow", 100),
-    SimpleEvent(Some(3), "2015-06-30T12:00:00.000", "Blue", 300),
-    SimpleEvent(Some(4), "2015-06-30T12:00:00.000", "Red", 900),
-    SimpleEvent(Some(5), "2015-06-30T11:00:00.000", "Green", 215),
-    SimpleEvent(Some(6), "2015-06-30T11:00:00.000", "Yellow", 110),
-    SimpleEvent(Some(7), "2015-06-30T11:00:00.000", "Blue", 130),
-    SimpleEvent(Some(8), "2015-06-30T11:00:00.000", "Red", 190),
-    SimpleEvent(Some(9), "2015-06-30T10:00:00.000", "Green", 25),
-    SimpleEvent(Some(10), "2015-06-30T10:00:00.000", "Yellow", 210),
-    SimpleEvent(Some(11), "2015-06-30T10:00:00.000", "Blue", 230),
-    SimpleEvent(Some(12), "2015-06-30T10:00:00.000", "Red", 290)
+    AggregationDynamoDB(Some(1), "2015-06-30T12:00:00.000", "Green", 55),
+    AggregationDynamoDB(Some(2), "2015-06-30T12:00:00.000", "Yellow", 100),
+    AggregationDynamoDB(Some(3), "2015-06-30T12:00:00.000", "Blue", 300),
+    AggregationDynamoDB(Some(4), "2015-06-30T12:00:00.000", "Red", 900),
+    AggregationDynamoDB(Some(5), "2015-06-30T11:00:00.000", "Green", 215),
+    AggregationDynamoDB(Some(6), "2015-06-30T11:00:00.000", "Yellow", 110),
+    AggregationDynamoDB(Some(7), "2015-06-30T11:00:00.000", "Blue", 130),
+    AggregationDynamoDB(Some(8), "2015-06-30T11:00:00.000", "Red", 190),
+    AggregationDynamoDB(Some(9), "2015-06-30T10:00:00.000", "Green", 25),
+    AggregationDynamoDB(Some(10), "2015-06-30T10:00:00.000", "Yellow", 210),
+    AggregationDynamoDB(Some(11), "2015-06-30T10:00:00.000", "Blue", 230),
+    AggregationDynamoDB(Some(12), "2015-06-30T10:00:00.000", "Red", 290)
   )
 }

@@ -19,7 +19,7 @@ import spray.json.DefaultJsonProtocol._
 import com.twitter.algebird.Operators._
 
 // package import
-import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
+import com.snowplowanalytics.model.{DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
 
 
 /**
@@ -28,49 +28,49 @@ import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, Simp
 object Aggregation {
 
   /**
-   * Helper Function for converting DynamoDB to SimpleEvent model
+   * Helper Function for converting DynamoDB to AggregationDynamoDB model
    */
-  def convertDataStage(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
-    var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
+  def convertDataStage(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.AggregationDynamoDB] =  {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[AggregationDynamoDB]
     for (a <- dynamoArray) {
       val result = a.map(unpack)
       println(result)
-      resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+      resultList += AggregationDynamoDB(Some(result(0).toInt), result(3), result(1), result(0).toInt)
     }
     resultList
   }
 
   /**
-   * Helper Function for converting DynamoDB to SimpleEvent model
+   * Helper Function for converting DynamoDB to AggregationDynamoDB model
    */
-  def convertDataStageHour(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
-    var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
+  def convertDataStageHour(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.AggregationDynamoDB] =  {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[AggregationDynamoDB]
     for (a <- dynamoArray) {
       val result = a.map(unpackHour)
       println(result)
-      resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+      resultList += AggregationDynamoDB(Some(result(0).toInt), result(3), result(1), result(0).toInt)
     }
     resultList
   }
 
   /**
-   * Helper Function for converting DynamoDB to SimpleEvent model
+   * Helper Function for converting DynamoDB to AggregationDynamoDB model
    */
-  def convertDataStageDay(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.SimpleEvent] =  {
-    var resultList = scala.collection.mutable.ArrayBuffer.empty[SimpleEvent]
+  def convertDataStageDay(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): scala.collection.mutable.ArrayBuffer[com.snowplowanalytics.model.AggregationDynamoDB] =  {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[AggregationDynamoDB]
     for (a <- dynamoArray) {
       val result = a.map(unpackDay)
       println(result)
-      resultList += SimpleEvent(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+      resultList += AggregationDynamoDB(Some(result(0).toInt), result(3), result(1), result(0).toInt)
     }
     resultList
   }
 
 
   /**
-   * Function takes collection of SimpleEvents and returns a JSON DruidResponse
+   * Function takes collection of AggregationDynamoDBs and returns a JSON DruidResponse
    */
-  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
+  def countDruidResponse(eventArray: List[com.snowplowanalytics.model.AggregationDynamoDB]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
     val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
     typeAndCountExtracted map {
@@ -83,9 +83,9 @@ object Aggregation {
   }
 
   /**
-   * Function takes collection of SimpleEvents and returns a JSON DruidResponse
+   * Function takes collection of AggregationDynamoDBs and returns a JSON DruidResponse
    */
-  def countHourlyDruidResponse(eventArray: List[com.snowplowanalytics.model.SimpleEvent]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
+  def countHourlyDruidResponse(eventArray: List[com.snowplowanalytics.model.AggregationDynamoDB]):  scala.collection.immutable.Iterable[spray.json.JsObject] = {
     val groupByTimestamp = eventArray.groupBy(_.timestamp)
     val typeAndCountExtracted = groupByTimestamp.mapValues(_.map(x => Map(x.eventType -> x.count)))
     val aggregateMaps = typeAndCountExtracted.mapValues( _.reduce(_+_))
@@ -99,11 +99,11 @@ object Aggregation {
   }
 
   /**
-   * Helper Function for custom marshaller for SimpleEvent model
+   * Helper Function for custom marshaller for AggregationDynamoDB model
    */
-  def serialize(events: List[SimpleEvent]): List[spray.json.JsObject] = {
+  def serialize(events: List[AggregationDynamoDB]): List[spray.json.JsObject] = {
     for (event <- events)
-      yield SimpleEventJsonProtocol.eventFormat.write(event)
+      yield AggregationDynamoDBJsonProtocol.eventFormat.write(event)
   }
 
   /**

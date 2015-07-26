@@ -17,7 +17,7 @@ import spray.json._
 import spray.httpx.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
 
-case class DruidResponse(timestamp: String, result: List[com.snowplowanalytics.model.SimpleEvent])
+case class DruidResponse(timestamp: String, result: List[com.snowplowanalytics.model.AggregationDynamoDB])
 
 /**"
  * Implements spray-json support so DruidResponse case class can be marshalled

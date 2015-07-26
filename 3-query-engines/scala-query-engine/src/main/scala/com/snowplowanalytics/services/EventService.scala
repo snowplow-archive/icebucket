@@ -28,7 +28,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 
 // package import
-import com.snowplowanalytics.model.{DruidResponse, SimpleEventJsonProtocol, SimpleEvent, DruidRequest}
+import com.snowplowanalytics.model.{DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
 import com.snowplowanalytics.services.EventData._
 import com.snowplowanalytics.services.Aggregation._
 
@@ -95,29 +95,29 @@ object EventService {
   // Testing data and methods below
   //////////////////////////////////////////////////////////////
 
-  //def getEvents(): List[SimpleEvent] = {
+  //def getEvents(): List[AggregationDynamoDB] = {
   //  testEvents.toList
   //}
 
-  def getEventById(eventId: Long): Option[SimpleEvent] = {
+  def getEventById(eventId: Long): Option[AggregationDynamoDB] = {
     testEvents find (_.id == Some(eventId))
   }
 
-  def addEvent(event: SimpleEvent): SimpleEvent = {
+  def addEvent(event: AggregationDynamoDB): AggregationDynamoDB = {
     val maxId = testEvents.map(_.id).flatten.max + 1
     val newEvent = event.copy(id = Some(maxId))
     testEvents += newEvent
     newEvent
   }
 
-  def updateEvent(event: SimpleEvent): Boolean = {
+  def updateEvent(event: AggregationDynamoDB): Boolean = {
     testEvents.indexWhere(_.id == event.id) match {
       case -1 => false
       case i => testEvents.update(i, event); true
     }
   }
 
-  def getEventsFilterGreen: List[SimpleEvent] = {
+  def getEventsFilterGreen: List[AggregationDynamoDB] = {
     testEvents.toList.filter(x => x.eventType == "Green")
   }
 

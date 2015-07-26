@@ -12,7 +12,7 @@
  */
 package com.snowplowanalytics.actors.routes
 
-import com.snowplowanalytics.model.{DruidRequest, SimpleEvent}
+import com.snowplowanalytics.model.{DruidRequest, AggregationDynamoDB}
 import com.snowplowanalytics.services.EventService
 import akka.actor.Props
 import spray.http.StatusCodes
@@ -46,7 +46,7 @@ class EventRoute() extends Actor with EventRouteTrait {
  */
 trait EventRouteTrait extends HttpService with SprayJsonSupport {
 
-  import com.snowplowanalytics.model.SimpleEventJsonProtocol
+  import com.snowplowanalytics.model.AggregationDynamoDBJsonProtocol
   import com.snowplowanalytics.model.DruidRequestJsonProtocol._
 
 
@@ -74,7 +74,7 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
     get {
       pathEnd {
         complete {
-          implicit val eventFormat = jsonFormat4(SimpleEvent)
+          implicit val eventFormat = jsonFormat4(AggregationDynamoDB)
           eventService.getEvents
         }
       }
