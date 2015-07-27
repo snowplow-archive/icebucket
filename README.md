@@ -70,3 +70,45 @@ Lastly in `/src/main/scala/com/example/actors/routes/ApiRouterActor.scala` chang
 
 		getFromResourceDirectory("app")
 
+## Copyright and license
+
+Ice Bucket Project is copyright 2015 Snowplow Analytics Ltd.
+
+Licensed under the **[Apache License, Version 2.0] [license]** (the "License");
+you may not use this software except in compliance with the License.
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+[travis]: https://travis-ci.org/snowplow/aws-lambda-nodejs-example-project
+[travis-image]: https://travis-ci.org/snowplow/aws-lambda-nodejs-example-project.png?branch=master
+[license-image]: http://img.shields.io/badge/license-Apache--2-blue.svg?style=flat
+[license]: http://www.apache.org/licenses/LICENSE-2.0
+[release-image]: http://img.shields.io/badge/release-0.1.0-blue.svg?style=flat
+[releases]: https://github.com/snowplow/aws-lambda-nodejs-example-project/releases
+[grunt-image]: https://cdn.gruntjs.com/builtwith.png
+
+[spark-example-project]: https://github.com/snowplow/spark-example-project
+[spark-streaming-example-project]: https://github.com/snowplow/spark-streaming-example-project
+
+[vagrant-install]: http://docs.vagrantup.com/v2/installation/index.html
+[virtualbox-install]: https://www.virtualbox.org/wiki/Downloads
+
+[blog-post]: http://snowplowanalytics.com/blog/2015/07/11/aws-lambda-nodejs-example-project-0.1.0-released/
+[020-milestone]: https://github.com/snowplow/aws-lambda-nodejs-example-project/milestones/Version%200.2.0
+[dynamodb-table-image]: /docs/dynamodb-table-image.png?raw=true
+
+[aws-lambda]: http://aws.amazon.com/lambda/
+[aws-kinesis]: http://aws.amazon.com/kinesis/
+[aws-dynamodb]: http://aws.amazon.com/dynamodb
+[vagrant-install]: http://docs.vagrantup.com/v2/installation/index.html
+[virtualbox-install]: https://www.virtualbox.org/wiki/Downloads
+[tim-b]: https://github.com/Tim-B
+[tim-b-post]: http://hipsterdevblog.com/blog/2014/12/07/writing-functions-for-aws-lambda-using-npm-and-grunt/
+[amazon-kinesis-aggregators]: https://github.com/awslabs/amazon-kinesis-aggregators
+
+[snowplow]: http://snowplowanalytics.com
+[icebucket]: https://github.com/snowplow/icebucket
