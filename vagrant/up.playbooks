@@ -4,3 +4,5 @@ oss-playbooks/sbt.yml
 oss-playbooks/nodejs.yml
 oss-playbooks/gulp.yml
 oss-playbooks/docker.yml
+oss-playbooks/aws-cli-and-psql.yml
+oss-playbooks/grunt.yml
