@@ -20,7 +20,7 @@ This program loads synthetic aggregated EventTypes log data simulating logs with
 colors = ['Red','Orange','Yellow','Green','Blue']
 
 # AWS DynamoDB settings
-table_name = "my-table"
+table_name = "mytable11"
 aws_region_name = "us-east-1"
 
 # AWS DynamoDB generator
@@ -70,9 +70,9 @@ def create_table():
   Creates DynamoDB table called my-table with Global
   Secondary Index
   """
-  return Table.create('my-table', schema=[
-    HashKey('CreatedAt'),
-    RangeKey('Count'),
+  return Table.create(table_name, schema=[
+    HashKey('CreatedAt',data_type=NUMBER),
+    RangeKey('Count',data_type=NUMBER),
   ], throughput={
     'read': 10,
     'write': 10,
@@ -86,12 +86,12 @@ def create_table():
       'write': 10,
     })
   ],
-  connection=boto.dynamodb2.connect_to_region('us-east-1')
+  connection=boto.dynamodb2.connect_to_region(aws_region_name)
   )
 
 
 def get_table():
-  return Table('my-table', schema=[
+  return Table(table_name, schema=[
     HashKey('CreatedAt'),
     RangeKey('Count'),
   ], global_indexes=[
@@ -104,19 +104,20 @@ def get_table():
 
 
 def put_table():
-event_id = get_event_id()
-color_choice = picker(colors)
-conn.put_item(data={
+  event_id = get_event_id()
+  color_choice = picker(colors)
+  conn.put_item(data={
     'CreatedAt': randint(1,100000),
     'Count': randint(1,100),
     'EventType': color_choice(),
     'Timestamp':  datetime.datetime.now().isoformat()
-})
+  })
 
 
 if __name__ == '__main__':
   conn = create_table()
+  time.sleep(15)
   while True:
-    event_id = put_table(conn)
+    event_id = put_table()
     print "Event sent to DynamoDB: {}".format(event_id)
-    time.sleep(1)
+    time.sleep(10)

@@ -35,7 +35,7 @@ object Aggregation {
     for (a <- dynamoArray) {
       val result = a.map(unpack)
       println(result)
-      resultList += AggregationDynamoDB(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+      resultList += AggregationDynamoDB(Some(result(0).toInt), result(2), result(1), result(0).toInt)
     }
     resultList
   }
@@ -48,7 +48,7 @@ object Aggregation {
     for (a <- dynamoArray) {
       val result = a.map(unpackHour)
       println(result)
-      resultList += AggregationDynamoDB(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+      resultList += AggregationDynamoDB(Some(result(0).toInt), result(2), result(1), result(0).toInt)
     }
     resultList
   }
@@ -61,7 +61,7 @@ object Aggregation {
     for (a <- dynamoArray) {
       val result = a.map(unpackDay)
       println(result)
-      resultList += AggregationDynamoDB(Some(result(0).toInt), result(3), result(1), result(0).toInt)
+      resultList += AggregationDynamoDB(Some(result(0).toInt), result(2), result(1), result(0).toInt)
     }
     resultList
   }

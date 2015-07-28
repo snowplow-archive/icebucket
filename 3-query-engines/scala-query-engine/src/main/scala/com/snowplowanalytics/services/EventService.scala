@@ -41,7 +41,7 @@ object EventService {
   implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
 
   // sets dynamodb table name
-  val tablename = "my-table"
+  val tablename = "mytable11"
 
   // sets up table and dynamodb connection
   val table: Table = dynamoDB.table(tablename).get
@@ -87,7 +87,7 @@ object EventService {
   }
 
   def getEvents(): String = {
-    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-04T10:00:00.000", "2015-06-10T14:00:00.000")))
+    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-04T10:00:00.000", "2015-07-27T23:50:00.000")))
     val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
     serialize(convertDataStage(attribsOfElements).toList).toJson.toString
   }
