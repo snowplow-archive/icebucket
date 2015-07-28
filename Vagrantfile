@@ -3,6 +3,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
   config.vm.hostname = "schema-guru"
   config.ssh.forward_agent = true
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+
 
   # Required for NFS to work, pick any local IP
   # Use NFS for shared folders for better performance

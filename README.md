@@ -5,11 +5,7 @@ UNRELEASED. An opinionated framework for analytics-on-write on event streams usi
 
 
 ## Introduction
-This is an example [Spray] REST API application with an Angular JS front end.  The REST API accepts a DRUID request and returns a DRUID response for events that were 
-
-processed from our [Kinesis] [aws-kinesis] stream of events ([introductory blog post] [blog-post]). When you make a DRUID request
-
-to the REST API it retrieves the previous counted `minute` aggregates from [DynamoDB] [aws-dynamodb].
+This is an example [Spray] REST API application with an Angular JS front end.  The REST API accepts a DRUID request and returns a DRUID response for events that were processed from our [Kinesis] [aws-kinesis] stream of events ([introductory blog post] [blog-post]). When you make a DRUID request to the REST API it retrieves the previous counted `minute` aggregates from [DynamoDB] [aws-dynamodb].
 
 This was built by the Data Science team at [Snowplow Analytics] [snowplow], who use AWS DynamoDB and Scala Spray in their projects.
 
@@ -18,6 +14,20 @@ This was built by the Data Science team at [Snowplow Analytics] [snowplow], who 
 _See also:_ [Spark Streaming Example Project][spark-streaming-example-project] | [Spark Example Project] [spark-example-project]
 
 ## Developer Quickstart
+
+### 1. Setting up AWS
+
+First we need to configure a default AWS profile:
+
+```bash
+$ aws configure
+AWS Access Key ID [None]: ...
+AWS Secret Access Key [None]: ...
+Default region name [None]: us-east-1
+Default output format [None]: json
+```
+
+### 2. 
 
 Start the application with `sbt run`.
 
