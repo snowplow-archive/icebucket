@@ -34,7 +34,7 @@ import com.amazonaws.services.dynamodbv2.document.{AttributeUpdate, DynamoDB, It
  *
  * val dynamoConnection = DynamoUtils.setupDynamoClientConnection(config.awsProfile)
  */
-object DynamoUtils {
+object DynamoDBUtility {
 
   val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   val timezone = TimeZone.getTimeZone("UTC")

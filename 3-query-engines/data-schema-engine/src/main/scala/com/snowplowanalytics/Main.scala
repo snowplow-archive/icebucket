@@ -4,6 +4,7 @@ import java.io.IOException
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent
 import com.amazonaws.services.lambda.runtime.events.KinesisEvent.KinesisEventRecord
 import scala.collection.JavaConversions._
+import awscala._, dynamodbv2._
 
 // Parser
 case class TimestampSpec(column: String, format: String)
@@ -37,7 +38,32 @@ class ProcessKinesisEvents {
             val record = new String(rec.getKinesis.getData.array())
             val dataSchema = scalaMapper.readValue(record, classOf[DataSchema])
 	        println(dataSchema)
+
+            // sets DynamoDB client to us-east-1
+            implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
+
+            // sets dynamodb table name
+            val tableName = "data-schema"
+            
+            // sets up table and dynamodb connection
+            val table: Table = dynamoDB.table(tableName).get
+
+            // put item into table
+
+        
+            //val googlers: Seq[Item] = table.scan(Seq("Company" -> cond.gt("Google")))
+
 	    }
 	}
+
+
+
+
+
+
+
+
+
+
 }
 
