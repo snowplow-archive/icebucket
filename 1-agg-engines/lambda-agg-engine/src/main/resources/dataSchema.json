@@ -1,0 +1,32 @@
+"dataSchema" : {
+  "dataSource" : "wikipedia",
+  "parser" : {
+    "type" : "string",
+    "parseSpec" : {
+      "format" : "json",
+      "timestampSpec" : {
+        "column" : "timestamp",
+        "format" : "auto"
+      }
+    }
+  },
+  "metricsSpec" : [{
+    "type" : "count",
+    "name" : "count"
+  }, {
+    "type" : "doubleSum",
+    "name" : "added",
+    "fieldName" : "added"
+  }, {
+    "type" : "doubleSum",
+    "name" : "deleted",
+    "fieldName" : "deleted"
+  }, {
+    "type" : "doubleSum",
+    "name" : "delta",
+    "fieldName" : "delta"
+  }],
+  "granularitySpec" : {
+    "queryGranularity" : "NONE"
+  }
+}
