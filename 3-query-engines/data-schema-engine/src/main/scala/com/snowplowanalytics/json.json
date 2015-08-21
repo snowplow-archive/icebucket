@@ -1,0 +1,41 @@
+val record = """
+{
+    "dataSchema": {
+        "dataSource": "wikipedia",
+        "parser": {
+            "type": "string",
+            "parseSpec": {
+                "format": "json",
+                "timestampSpec": {
+                    "column": "timestamp",
+                    "format": "auto"
+                }
+            }
+        },
+        "metricsSpec": [
+            {
+                "type": "count1",
+                "name": "count2"
+            },
+            {
+                "type": "doubleSum1",
+                "name": "added1",
+                "fieldName": "added2"
+            },
+            {
+                "type": "doubleSum2",
+                "name": "deleted1",
+                "fieldName": "deleted2"
+            },
+            {
+                "type": "doubleSum3",
+                "name": "delta1",
+                "fieldName": "delta2"
+            }
+        ],
+        "granularitySpec": {
+            "queryGranularity": "NONE"
+        }
+    }
+}
+"""

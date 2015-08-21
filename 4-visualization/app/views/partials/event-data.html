@@ -1,0 +1,11 @@
+<a class="pull-left" href="#events/{{event.id}}">
+	<img class="media-object" alt="snowplow" style="width: 64px; height: 64px;" src="https://avatars1.githubusercontent.com/u/1476001">
+</a>
+<div class="media-body text-left">
+	<h4 class="media-heading">{{event.timestamp}}, {{event.eventType}}</h4>
+	Count: {{event.count}}
+	<div class="pull-right">
+		<a ng-if="canEdit == false" class="btn btn-default btn-xs" ng-click="editEvent(event)"> <i class="fa fa-pencil fa-fw fa-lg"></i></a>
+		<a ng-if="canDelete == false" class="btn btn-danger btn-xs" ng-click="deleteEvent(event)"> <i class="fa fa-trash-o fa-fw fa-lg"></i></a>
+	</div>
+</div>
