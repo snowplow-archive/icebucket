@@ -12,7 +12,7 @@
  */
 package com.snowplowanalytics.actors.routes
 
-import com.snowplowanalytics.model.{DruidRequest, AggregationDynamoDB}
+import com.snowplowanalytics.model.{DruidRequest, SchemaRequest, AggregationDynamoDB}
 import com.snowplowanalytics.services.EventService
 import akka.actor.Props
 import spray.http.StatusCodes
@@ -47,13 +47,7 @@ class EventRoute() extends Actor with EventRouteTrait {
 trait EventRouteTrait extends HttpService with SprayJsonSupport {
 
   import com.snowplowanalytics.model.AggregationDynamoDBJsonProtocol
-  import com.snowplowanalytics.model.DruidRequestJsonProtocol._
-
-
-  import spray.json._
-  import spray.httpx.SprayJsonSupport
-  import spray.json.DefaultJsonProtocol
-
+  import com.snowplowanalytics.services.RequestJsonProtocol._
 
   private val eventService = EventService
   val log = LoggerFactory.getLogger(classOf[EventRouteTrait])
@@ -68,6 +62,15 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
     }
   }
 
+  def postSchemaRequest = post {
+    path ("schema"){
+      entity(as[SchemaRequest]) { schemaEvent =>
+        log.debug(s"Schema Event ${schemaEvent}")
+        val result = eventService.schemaRequest(schemaEvent)
+        complete(result)
+      }
+    }
+  }
 
   // main function that handles routes to the EventService
   val eventRoute = {
@@ -78,8 +81,11 @@ trait EventRouteTrait extends HttpService with SprayJsonSupport {
           eventService.getEvents
         }
       }
-    } ~
+    } ~ {
     postDruidRequest
+    } ~ {
+    postSchemaRequest
+    }
   }
 
 }

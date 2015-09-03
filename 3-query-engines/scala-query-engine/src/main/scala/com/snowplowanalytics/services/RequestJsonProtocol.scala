@@ -10,7 +10,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
  */
-package com.snowplowanalytics.model
+package com.snowplowanalytics.services
 
+import com.snowplowanalytics.model._
+import spray.json._
+import spray.httpx.SprayJsonSupport
+import spray.json.DefaultJsonProtocol
 
-case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: List[String])
+/**
+ * Implements spray-json support so DruidRequest case class can be marshalled
+ * to/from json when accepting and completing requests
+ */
+object RequestJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
+  implicit val druidFormat = jsonFormat4(DruidRequest)
+  implicit val schemaFormat = jsonFormat4(SchemaRequest)
+}

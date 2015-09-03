@@ -12,11 +12,6 @@
  */
 package com.snowplowanalytics.model
 
-import com.snowplowanalytics.model.DruidRequestJsonProtocol._
-import spray.json._
-import spray.httpx.SprayJsonSupport
-import spray.json.DefaultJsonProtocol
-
 case class DruidResponse(timestamp: String, result: List[com.snowplowanalytics.model.AggregationDynamoDB])
 
 /**"
@@ -37,6 +32,6 @@ case class DruidResponse(timestamp: String, result: List[com.snowplowanalytics.m
  *
  *
  */
-object DruidResponseJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
-  implicit val druidResponseFormat = jsonFormat4(DruidRequest)
-}
+//object DruidResponseJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
+//  implicit val druidResponseFormat = jsonFormat4(DruidRequest)
+//}

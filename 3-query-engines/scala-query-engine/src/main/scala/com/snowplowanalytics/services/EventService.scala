@@ -28,7 +28,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 
 // package import
-import com.snowplowanalytics.model.{DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
+import com.snowplowanalytics.model.{DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest, SchemaRequest}
 import com.snowplowanalytics.services.EventData._
 import com.snowplowanalytics.services.Aggregation._
 
@@ -41,7 +41,7 @@ object EventService {
   implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
 
   // sets dynamodb table name
-  val tablename = "mytable11"
+  val tablename = "my-table11"
 
   // sets up table and dynamodb connection
   val table: Table = dynamoDB.table(tablename).get
@@ -67,6 +67,30 @@ object EventService {
    * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
   def druidRequest(druidRequest: DruidRequest): String = {
+    val intervals = druidRequest.intervals(0).split("/")
+    val table: Table = dynamoDB.table(druidRequest.dataSource).get
+    if (druidRequest.granularity == "hour") {
+      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyHour.bucket(intervals(1)))))
+      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+      countHourlyDruidResponse(convertDataStageHour(attribsOfElements).toList).toJson.toString
+    } else if (druidRequest.granularity == "day"){
+      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
+      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+      countHourlyDruidResponse(convertDataStageDay(attribsOfElements).toList).toJson.toString
+      // parse all timestamps by day - normalize
+      // aggregate by day
+    } else {
+      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
+      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
+      countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
+    }
+  }
+
+  /**
+   * Function gets all events matching range between 2 time buckets in DynamoDB
+   * scala.collection.immutable.Iterable[spray.json.JsObject]
+   */
+  def schemaRequest(druidRequest: SchemaRequest): String = {
     val intervals = druidRequest.intervals(0).split("/")
     val table: Table = dynamoDB.table(druidRequest.dataSource).get
     if (druidRequest.granularity == "hour") {

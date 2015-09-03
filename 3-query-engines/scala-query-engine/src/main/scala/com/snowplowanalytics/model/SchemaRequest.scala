@@ -13,4 +13,4 @@
 package com.snowplowanalytics.model
 
 
-case class DruidRequest(queryType: String, dataSource: String, granularity: String, intervals: List[String])
+case class SchemaRequest(queryType: String, dataSource: String, granularity: String, intervals: List[String])
