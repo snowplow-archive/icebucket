@@ -13,4 +13,4 @@
 package com.snowplowanalytics.model
 
 
-case class SchemaRequest(queryType: String, dataSource: String, granularity: String, intervals: List[String])
+case class ParserTypes(`type`: String, parseSpec: ParseSpec)

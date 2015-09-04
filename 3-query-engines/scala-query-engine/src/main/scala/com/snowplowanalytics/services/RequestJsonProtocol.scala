@@ -23,5 +23,18 @@ import spray.json.DefaultJsonProtocol
  */
 object RequestJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val druidFormat = jsonFormat4(DruidRequest)
-  implicit val schemaFormat = jsonFormat4(SchemaRequest)
+  implicit val timestampSpecJsonProtocol = jsonFormat2(TimestampSpec)
+  implicit val parseSpecJsonProtocol = jsonFormat2(ParseSpec)
+  implicit val parserTypesJsonProtocol = jsonFormat2(ParserTypes)
+  implicit val parserJsonProtocol = jsonFormat1(Parser)
 }
+
+
+
+
+//case class TimestampSpec(column: String, format: String)
+//case class ParseSpec(format: String, timestampSpec: TimestampSpec)
+//case class ParserTypes(`type`: String, parseSpec: ParseSpec)
+//case class Parser(parser: ParserTypes)
+
+
