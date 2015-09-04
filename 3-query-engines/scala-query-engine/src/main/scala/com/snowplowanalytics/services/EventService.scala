@@ -28,7 +28,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 
 // package import
-import com.snowplowanalytics.model.{Body, QueryGranularity, MetricUnit, ParserTypes, TimestampSpec, ParseSpec, DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
+import com.snowplowanalytics.model.{DataSchema, Body, QueryGranularity, MetricUnit, ParserTypes, TimestampSpec, ParseSpec, DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
 import com.snowplowanalytics.services.EventData._
 import com.snowplowanalytics.services.Aggregation._
 
@@ -90,7 +90,7 @@ object EventService {
    * Function gets all events matching range between 2 time buckets in DynamoDB
    * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
-  def schemaRequest(q: Body): String = {
+  def schemaRequest(q: DataSchema): String = {
     "asdfa"
   }
 
