@@ -26,7 +26,10 @@ object RequestJsonProtocol extends DefaultJsonProtocol with SprayJsonSupport {
   implicit val timestampSpecJsonProtocol = jsonFormat2(TimestampSpec)
   implicit val parseSpecJsonProtocol = jsonFormat2(ParseSpec)
   implicit val parserTypesJsonProtocol = jsonFormat2(ParserTypes)
-  implicit val parserJsonProtocol = jsonFormat1(Parser)
+  implicit val metricUnitJsonProtocol = jsonFormat3(MetricUnit)
+  implicit val queryGranularityJsonProtocol = jsonFormat1(QueryGranularity)
+  implicit val bodyJsonProtocol = jsonFormat4(Body)
+
 }
 
 

@@ -13,4 +13,5 @@
 package com.snowplowanalytics.model
 
 
-case class Parser(parser: ParserTypes)
+// Body of Request 
+case class Body(dataSource:String, parser:ParserTypes, metricsSpec: List[MetricUnit], granularitySpec: QueryGranularity)
