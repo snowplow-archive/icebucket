@@ -28,9 +28,8 @@ import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 
 // package import
-import com.snowplowanalytics.model.{DataSchema, Body, QueryGranularity, MetricUnit, ParserTypes, TimestampSpec, ParseSpec, DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
-import com.snowplowanalytics.services.EventData._
-import com.snowplowanalytics.services.Aggregation._
+import com.snowplowanalytics.model.{DataSchema, Body, QueryGranularity, MetricUnit, ParserTypes, TimestampSpec, ParseSpec}
+import com.snowplowanalytics.services.ZipUtils.jarSlicer
 
 /**
  * SchemaService Object holds all the functions for DynamoDB access to the DataSchema table
@@ -41,7 +40,7 @@ object SchemaService {
   implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
 
   // sets dynamodb table name
-  val tablename = "my-table11"
+  val tablename = "data-schema"
 
   // sets up table and dynamodb connection
   val table: Table = dynamoDB.table(tablename).get
@@ -54,44 +53,40 @@ object SchemaService {
   val Include = aws.model.ProjectionType.INCLUDE
   val All = aws.model.ProjectionType.ALL
 
-  // sets up table access to global secondary index with read write 10
-  val globalSecondaryIndex = GlobalSecondaryIndex(
-    name = "CountsIndex",
-    keySchema = Seq(KeySchema("EventType", Hash), KeySchema("Timestamp", Range)),
-    projection = Projection(All),
-    provisionedThroughput = ProvisionedThroughput(readCapacityUnits = 10, writeCapacityUnits = 10)
-  )
-
-  /**
-   * Function gets all events matching range between 2 time buckets in DynamoDB
-   * scala.collection.immutable.Iterable[spray.json.JsObject]
-   */
-  def druidRequest(druidRequest: DruidRequest): String = {
-    val intervals = druidRequest.intervals(0).split("/")
-    val table: Table = dynamoDB.table(druidRequest.dataSource).get
-    if (druidRequest.granularity == "hour") {
-      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyHour.bucket(intervals(1)))))
-      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-      countHourlyDruidResponse(convertDataStageHour(attribsOfElements).toList).toJson.toString
-    } else if (druidRequest.granularity == "day"){
-      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
-      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-      countHourlyDruidResponse(convertDataStageDay(attribsOfElements).toList).toJson.toString
-      // parse all timestamps by day - normalize
-      // aggregate by day
-    } else {
-      val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
-      val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-      countDruidResponse(convertDataStage(attribsOfElements).toList).toJson.toString
-    }
-  }
-
   /**
    * Function gets all events matching range between 2 time buckets in DynamoDB
    * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
   def schemaRequest(q: DataSchema): String = {
-    "schemaSerivce"
+    //val result: Seq[Item] = table.scan(Seq("dataSource" -> cond.gt("wikipedia")))
+    //val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = result.map(_.attributes)
+    //convertDataStage(attribsOfElements).toString
+    jarSlicer("in.zip", "out.zip", "def.txt")
+    "new jar created"
+  }
+
+  /**
+   * Helper Function for converting DynamoDB to AggregationDynamoDB model
+   */
+  def convertDataStage(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]) {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[String]
+    for (a <- dynamoArray) {
+      val result = a.map(unpack)
+      //println(result.toString)
+      resultList += result(3)
+    }
+    resultList
+  }
+
+
+  /**
+   * Helper Function for convertDataStage - unpacks DynamoDB table values
+   */
+  def unpack(x: Any): String = x match {
+    case Attribute("dataSource", value) => value.getS
+    case Attribute("metricSpec", value) => value.getS
+    case Attribute("Body", value) => value.getS
+    case Attribute("queryGranularity", value) => value.getS
   }
 
 }

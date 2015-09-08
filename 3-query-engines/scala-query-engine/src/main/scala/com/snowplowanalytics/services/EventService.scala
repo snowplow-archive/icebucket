@@ -28,7 +28,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol._
 
 // package import
-import com.snowplowanalytics.model.{DataSchema, Body, QueryGranularity, MetricUnit, ParserTypes, TimestampSpec, ParseSpec, DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
+import com.snowplowanalytics.model.{DruidResponse, AggregationDynamoDBJsonProtocol, AggregationDynamoDB, DruidRequest}
 import com.snowplowanalytics.services.EventData._
 import com.snowplowanalytics.services.Aggregation._
 
@@ -77,8 +77,6 @@ object EventService {
       val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), BucketingStrategyDay.bucket(intervals(1)))))
       val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
       countHourlyDruidResponse(convertDataStageDay(attribsOfElements).toList).toJson.toString
-      // parse all timestamps by day - normalize
-      // aggregate by day
     } else {
       val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between(intervals(0), intervals(1))))
       val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
@@ -86,24 +84,6 @@ object EventService {
     }
   }
 
-  /**
-   * Function gets all events matching range between 2 time buckets in DynamoDB
-   * scala.collection.immutable.Iterable[spray.json.JsObject]
-   */
-  def schemaRequest(q: DataSchema): String = {
-    // sets DynamoDB client to us-east-1
-    implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
-
-    // sets dynamodb table name
-    val tableName = "data-schema"
-    
-    // sets up table and dynamodb connection
-    val table: Table = dynamoDB.table(tableName).get
-
-    "eventSerivces"
-
-
-  }
 
   def getEvents(): String = {
     val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-04T10:00:00.000", "2015-07-27T23:50:00.000")))
