@@ -58,24 +58,24 @@ object SchemaService {
    * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
   def schemaRequest(q: DataSchema): String = {
-    //val result: Seq[Item] = table.scan(Seq("dataSource" -> cond.gt("wikipedia")))
-    //val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = result.map(_.attributes)
-    //convertDataStage(attribsOfElements).toString
-    jarSlicer("in.zip", "out.zip", "def.txt")
-    "new jar created"
+    val result: Seq[Item] = table.scan(Seq("dataSource" -> cond.eq("wikipedia")))
+    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = result.map(_.attributes)
+    convertData(attribsOfElements).toString
+    //jarSlicer("in.zip", "out.zip", "def.txt")
+    //"new jar created"
   }
 
   /**
    * Helper Function for converting DynamoDB to AggregationDynamoDB model
    */
-  def convertDataStage(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]) {
-    var resultList = scala.collection.mutable.ArrayBuffer.empty[String]
+  def convertData(dynamoArray: Seq[Seq[awscala.dynamodbv2.Attribute]]): String = {
+    var resultList = scala.collection.mutable.ArrayBuffer.empty[TimestampSpec]
     for (a <- dynamoArray) {
       val result = a.map(unpack)
-      //println(result.toString)
-      resultList += result(3)
+      println(result)
+      resultList += TimestampSpec(result(1), result(2)) 
     }
-    resultList
+    resultList.toString
   }
 
 
