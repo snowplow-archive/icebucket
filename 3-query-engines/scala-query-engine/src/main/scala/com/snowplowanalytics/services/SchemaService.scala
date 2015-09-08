@@ -33,9 +33,9 @@ import com.snowplowanalytics.services.EventData._
 import com.snowplowanalytics.services.Aggregation._
 
 /**
- * EventService Object holds all the functions for DynamoDB access my-table
+ * SchemaService Object holds all the functions for DynamoDB access to the DataSchema table
  */
-object EventService {
+object SchemaService {
 
   // sets DynamoDB client to us-east-1
   implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
@@ -91,59 +91,7 @@ object EventService {
    * scala.collection.immutable.Iterable[spray.json.JsObject]
    */
   def schemaRequest(q: DataSchema): String = {
-    // sets DynamoDB client to us-east-1
-    implicit val dynamoDB = DynamoDB.at(Region.US_EAST_1)
-
-    // sets dynamodb table name
-    val tableName = "data-schema"
-    
-    // sets up table and dynamodb connection
-    val table: Table = dynamoDB.table(tableName).get
-
-    "eventSerivces"
-
-
+    "schemaSerivce"
   }
 
-  def getEvents(): String = {
-    val timestampResult: Seq[awscala.dynamodbv2.Item] = table.scan(Seq("Timestamp" -> cond.between("2015-06-04T10:00:00.000", "2015-07-27T23:50:00.000")))
-    val attribsOfElements: Seq[Seq[awscala.dynamodbv2.Attribute]] = timestampResult.map(_.attributes)
-    serialize(convertDataStage(attribsOfElements).toList).toJson.toString
-  }
-  //////////////////////////////////////////////////////////////
-  // Testing data and methods below
-  //////////////////////////////////////////////////////////////
-
-  //def getEvents(): List[AggregationDynamoDB] = {
-  //  testEvents.toList
-  //}
-
-  def getEventById(eventId: Long): Option[AggregationDynamoDB] = {
-    testEvents find (_.id == Some(eventId))
-  }
-
-  def addEvent(event: AggregationDynamoDB): AggregationDynamoDB = {
-    val maxId = testEvents.map(_.id).flatten.max + 1
-    val newEvent = event.copy(id = Some(maxId))
-    testEvents += newEvent
-    newEvent
-  }
-
-  def updateEvent(event: AggregationDynamoDB): Boolean = {
-    testEvents.indexWhere(_.id == event.id) match {
-      case -1 => false
-      case i => testEvents.update(i, event); true
-    }
-  }
-
-  def getEventsFilterGreen: List[AggregationDynamoDB] = {
-    testEvents.toList.filter(x => x.eventType == "Green")
-  }
-
-  def deleteEvent(id: Long): Unit = {
-    getEventById(id) match {
-      case Some(event) => testEvents -= event
-      case None =>
-    }
-  }
 }

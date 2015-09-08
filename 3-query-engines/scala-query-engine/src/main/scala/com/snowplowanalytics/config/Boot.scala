@@ -32,7 +32,7 @@ object Boot extends App {
    compactUsage = true,
    preUsage = Some("%s: Version %s. Copyright (c) 2015, %s.".format(
      "Project Icebucket",
-     "1.0",
+     "0.1.0",
      "Snowplow Analytics")
    )
   )
