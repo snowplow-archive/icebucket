@@ -56,29 +56,14 @@ URL
 Body of request
 ```
 {
-    "dataSchema": {
-        "dataSource": "wikipedia",
-        "parser": {
-            "type": "string",
-            "parseSpec": {
-                "format": "json",
-                "timestampSpec": {
-                    "column": "timestamp",
-                    "format": "auto"
-                }
-            }
-        },
-        "metricsSpec": [
-            {
-                "type": "count1",
-                "name": "count2"
-            },
-            {
-                "type": "doubleSum1",
-                "name": "added1",
-                "fieldName": "added2"
-            },
-
+    "queryType": "timeseries", 
+    "dataSource":"my-table11",
+    "granularity": "day",
+    "intervals": [
+        "2015-06-04T12:54:00.000/2015-07-28T23:56:00.000"
+        ]
+}
+```
 
 ## Number 2 - SCHEMA json request
 URL
