@@ -49,6 +49,9 @@
 
 
 ## Number 1 - DRUID json request
+SCREENSHOT POST
+https://bigsnarf.files.wordpress.com/2015/09/screen-shot-2015-09-10-at-9-05-31-am.png
+
 URL
 `http://localhost:8080/api/events/druid`
 
@@ -66,6 +69,9 @@ Body of request
 ```
 
 ## Number 2 - SCHEMA json request
+SCREENSHOT POST
+https://bigsnarf.files.wordpress.com/2015/09/screen-shot-2015-09-10-at-9-06-14-am.png
+
 URL
 `http://localhost:8080/api/events/schema`
 
