@@ -26,6 +26,10 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.document.{AttributeUpdate, DynamoDB, Item}
 
+
+// package import
+import com.snowplowanalytics.model.DataSchema
+
 /**
  * Object sets up singleton that finds AWS credentials for DynamoDB to access the
  * aggregation records table. The utility function below puts items into the
@@ -58,17 +62,17 @@ object DynamoUtils {
   /**
    * Function wraps get or create item in DynamoDB table
    */
-  def setOrUpdateCount(dynamoDB: DynamoDB, tableName: String, dataSchema: DataSchema){
+  def getOrUpdate(dynamoDB: DynamoDB, tableName: String){
 
-    val recordInTable = getItem(dynamoDB: DynamoDB, tableName, dataSchema.body, dataSchema.dataSource)
+    val recordInTable = getItem(dynamoDB: DynamoDB, tableName, "body12")
     println(recordInTable)
     if (recordInTable == null) {
-      DynamoUtils.putItem(dynamoDB: DynamoDB, 
+      putItem(dynamoDB: DynamoDB, 
                                     tableName, 
-                                    dataSchema.body, 
-                                    dataSchema.dataSource, 
-                                    dataSchema.metricSpec, 
-                                    dataSchema.queryGranularity)
+                                    "dataSchema.Body2341234", 
+                                    "dataSchema.dataSource12341234", 
+                                    "dataSchema.metricSpec1234234", 
+                                    "dataSchema.queryGranularity12341234")
       // build and upload jar
     } else {
       // pull a record 
@@ -79,20 +83,20 @@ object DynamoUtils {
   /**
    * Function wraps AWS Java getItemOutcome operation to DynamoDB table
    */
-  def getItem(dynamoDB: DynamoDB, tableName: String, body: String, dataSource: String): Item = {
+    def getItem(dynamoDB: DynamoDB, tableName: String, body: String): Item = {
 
-    val table = dynamoDB.getTable(tableName)
-    val items = table.getItemOutcome("Body", body, "dataSource", dataSource)
-    items.getItem
-  }
+      val table = dynamoDB.getTable(tableName)
+      val items = table.getItemOutcome("Body", body)
+      items.getItem
+    }
 
 
   /**
    * Function wraps AWS Java putItem operation to DynamoDB table
    */
-  def putItem(dynamoDB: DynamoDB, tableName: String, dataSchema: DataSchema) {
+  def putItem(dynamoDB: DynamoDB, tableName: String, body: String, dataSource: String, metricSpec: String, queryGranularity: String) {
 
-    val tablePrimaryKeyName = "body"
+    val tablePrimaryKeyName = "Body"
     val tableDataSourceColumnName = "dataSource"
     val tableMetricSpecColumnName = "metricSpec"
     val tableQueryGranularityColumnName = "queryGranularity"
@@ -105,13 +109,12 @@ object DynamoUtils {
       val table = dynamoDB.getTable(tableName)
       println("Adding data to " + tableName)
 
-      val item = new Item().withPrimaryKey(tablePrimaryKeyName, dataSchema.body)
-        .withString(tableDataSourceColumnName, dataSchema.dataSource)
-        .withString(tableMetricSpecColumnName, dataSchema.metricSpec)
-        .withString(tableQueryGranularityColumnName, dataSchema.queryGranularity)
+      val item = new Item().withPrimaryKey(tablePrimaryKeyName, body)
+        .withString(tableDataSourceColumnName, dataSource)
+        .withString(tableMetricSpecColumnName, metricSpec)
+        .withString(tableQueryGranularityColumnName, queryGranularity)
 
-      // saving the data to DynamoDB AggregrateRecords table
-      // println(item)
+      // saving the data to DynamoDB table
       table.putItem(item)
     } catch {
       case e: Exception => {

@@ -2,3 +2,128 @@
 
 1. First route DRUID json request gets aggregate data from DynanoDB
 2. Second route SCHEMA json request checks AWS Lambda in place and creates if none found
+
+## Files 
+
+```
+└── src
+    └── main
+        ├── resources
+        │   ├── application.conf
+        │   └── logback.xml
+        └── scala
+            └── com
+                └── snowplowanalytics
+                    ├── actors
+                    │   └── routes
+                    │       ├── ApiRouterActor.scala
+                    │       └── EventRoute.scala
+                    ├── config
+                    │   ├── ActorServiceSystem.scala
+                    │   └── Boot.scala
+                    ├── model
+                    │   ├── AggregationDynamoDB.scala
+                    │   ├── Body.scala
+                    │   ├── DataSchema.scala
+                    │   ├── DruidRequest.scala
+                    │   ├── DruidResponse.scala
+                    │   ├── MetricUnit.scala
+                    │   ├── ParseSpec.scala
+                    │   ├── ParserTypes.scala
+                    │   ├── QueryGranularity.scala
+                    │   └── TimestampSpec.scala
+                    └── services
+                        ├── Aggregration.scala
+                        ├── BucketDay.scala
+                        ├── BucketHour.scala
+                        ├── DynamoDBUtils.scala
+                        ├── EventData.scala
+                        ├── EventService.scala
+                        ├── RequestJsonProtocol.scala
+                        ├── SchemaService.scala
+                        └── ZipUtils.scala
+```
+
+## Run project
+`sbt run`
+
+
+## Number 1 - DRUID json request
+URL
+`http://localhost:8080/api/events/druid`
+
+
+Body of request
+```
+{
+    "dataSchema": {
+        "dataSource": "wikipedia",
+        "parser": {
+            "type": "string",
+            "parseSpec": {
+                "format": "json",
+                "timestampSpec": {
+                    "column": "timestamp",
+                    "format": "auto"
+                }
+            }
+        },
+        "metricsSpec": [
+            {
+                "type": "count1",
+                "name": "count2"
+            },
+            {
+                "type": "doubleSum1",
+                "name": "added1",
+                "fieldName": "added2"
+            },
+
+
+## Number 2 - SCHEMA json request
+URL
+`http://localhost:8080/api/events/schema`
+
+
+Body of request
+```
+{
+    "dataSchema": {
+        "dataSource": "wikipedia",
+        "parser": {
+            "type": "string",
+            "parseSpec": {
+                "format": "json",
+                "timestampSpec": {
+                    "column": "timestamp",
+                    "format": "auto"
+                }
+            }
+        },
+        "metricsSpec": [
+            {
+                "type": "count1",
+                "name": "count2"
+            },
+            {
+                "type": "doubleSum1",
+                "name": "added1",
+                "fieldName": "added2"
+            },
+            {
+                "type": "doubleSum2",
+                "name": "deleted1",
+                "fieldName": "deleted2"
+            },
+            {
+                "type": "doubleSum3",
+                "name": "delta1",
+                "fieldName": "delta2"
+            }
+        ],
+        "granularitySpec": {
+            "queryGranularity": "NONE"
+        }
+    }
+}
+```
